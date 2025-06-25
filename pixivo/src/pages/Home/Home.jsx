@@ -1,10 +1,20 @@
 import React from "react";
+import Navbar from "../../components/Navbar";
+import HeroSection from "../../components/HeroSection";
+import TemplatesSection from "../../components/TemplatesSection";
+import ServicesSection from "../../components/ServicesSection";
+import ContactSection from "../../components/ContactSection";
+import Footer from "../../components/Footer";
 
 const Home = () => {
   return (
-    <div>
-      {" "}
-      <h1 class="text-3xl font-bold underline">Hello world!</h1>
+    <div className="min-h-screen">
+      <Navbar />
+      <HeroSection />
+      <TemplatesSection />
+      <ServicesSection />
+      <ContactSection />
+      <Footer />
     </div>
   );
 };
