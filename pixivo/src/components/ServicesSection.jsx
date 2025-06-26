@@ -137,14 +137,6 @@ const ServicesSection = () => {
                 ))}
               </ul>
 
-              {/* CTA Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full mt-6 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-primary hover:text-white transition-all duration-300"
-              >
-                Learn More
-              </motion.button>
             </motion.div>
           ))}
         </motion.div>

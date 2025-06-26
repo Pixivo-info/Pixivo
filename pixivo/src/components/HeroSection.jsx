@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
@@ -29,34 +29,34 @@ const HeroSection = () => {
   return (
     <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <Motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="text-center"
         >
-          <motion.h1
+          <Motion.h1
             variants={itemVariants}
             className="text-4xl md:text-6xl lg:text-7xl font-bold font-syne text-gray-900 mb-6"
           >
             Create Amazing{' '}
             <span className="text-primary">Digital</span>{' '}
             Experiences
-          </motion.h1>
+          </Motion.h1>
           
-          <motion.p
+          <Motion.p
             variants={itemVariants}
             className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
           >
             Discover our collection of premium templates, custom UI/UX designs, 
             and development solutions that bring your ideas to life with style and precision.
-          </motion.p>
+          </Motion.p>
           
-          <motion.div
+          <Motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <motion.div
+            <Motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -79,22 +79,22 @@ const HeroSection = () => {
                   />
                 </svg>
               </Link>
-            </motion.div>
+            </Motion.div>
             
-            <motion.div
+            <Motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <a
                 href="#contact"
-                className="inline-flex items-center px-8 py-4 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-all duration-300"
+                className="inline-flex items-center px-8 py-4 border-2 border-green-500 text-green-500 font-semibold rounded-lg hover:bg-green-500 hover:text-white transition-all duration-300"
               >
                 Get In Touch
               </a>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
           
-          {/* <motion.div
+          {/* <Motion.div
             variants={itemVariants}
             className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
           >
@@ -110,8 +110,8 @@ const HeroSection = () => {
               <div className="text-3xl font-bold font-syne text-primary mb-2">99%</div>
               <div className="text-gray-600">Satisfaction Rate</div>
             </div>
-          </motion.div> */}
-        </motion.div>
+          </Motion.div> */}
+        </Motion.div>
       </div>
     </section>
   );

@@ -11,6 +11,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Templates', path: '/templates' },
+    { name: 'About', path: '/about' },
     { name: 'Contact', path: '/#contact' },
   ];
 
@@ -29,7 +30,12 @@ const Navbar = () => {
             whileTap={{ scale: 0.95 }}
             className="flex-shrink-0"
           >
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <img 
+                src="/Logo.png" 
+                alt="Pixivo Logo" 
+                className="h-8 w-8 object-contain"
+              />
               <span className="text-2xl font-bold font-syne text-primary">
                 Pixivo
               </span>

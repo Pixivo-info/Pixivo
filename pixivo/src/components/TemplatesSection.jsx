@@ -7,7 +7,7 @@ const TemplatesSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, threshold: 0.2 });
 
-  // Sample template data - replace with real data from API
+  // Featured template data with complete details matching Templates.jsx
   const templates = [
     {
       id: 1,
@@ -15,7 +15,9 @@ const TemplatesSection = () => {
       budget: 49,
       rating: 5,
       downloads: "2.3k",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop"
+      category: "dashboard",
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+      technologies: ["HTML", "CSS", "JS", "REACT"]
     },
     {
       id: 2,
@@ -23,7 +25,9 @@ const TemplatesSection = () => {
       budget: 79,
       rating: 4,
       downloads: "1.8k",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop"
+      category: "ecommerce",
+      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
+      technologies: ["HTML", "CSS", "JS", "BOOTSTRAP"]
     },
     {
       id: 3,
@@ -31,15 +35,19 @@ const TemplatesSection = () => {
       budget: 65,
       rating: 5,
       downloads: "3.1k",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop"
+      category: "mobile",
+      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop",
+      technologies: ["REACT", "CSS", "JS", "TAILWIND"]
     },
     {
       id: 4,
       title: "Landing Page Template",
-      budget: 35,
+      budget: 0,
       rating: 4,
       downloads: "1.5k",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop"
+      category: "landing",
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
+      technologies: ["HTML", "CSS", "JS", "BOOTSTRAP"]
     },
     {
       id: 5,
@@ -47,7 +55,9 @@ const TemplatesSection = () => {
       budget: 45,
       rating: 5,
       downloads: "2.7k",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop"
+      category: "portfolio",
+      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
+      technologies: ["HTML", "CSS", "JS", "SCSS"]
     },
     {
       id: 6,
@@ -55,7 +65,9 @@ const TemplatesSection = () => {
       budget: 89,
       rating: 4,
       downloads: "1.9k",
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop"
+      category: "dashboard",
+      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop",
+      technologies: ["VUE", "CSS", "JS", "BOOTSTRAP"]
     }
   ];
 
@@ -108,7 +120,7 @@ const TemplatesSection = () => {
           initial={{ opacity: 0, x: 50 }}
           animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="relative "
+          className="relative"
         >
           {/* View More Templates Label */}
           <div className="flex justify-end mb-6">
@@ -155,7 +167,7 @@ const TemplatesSection = () => {
               {[...templates, ...templates].map((template, index) => (
                 <motion.div
                   key={`${template.id}-${index}`}
-                  className="flex-shrink-0 w-80"
+                  className="flex-shrink-0 w-96 h-96"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.6, delay: (index % templates.length) * 0.1 }}
@@ -181,39 +193,6 @@ const TemplatesSection = () => {
               ))}
             </div>
           </div>
-        </motion.div>
-
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, delay: 1 }}
-          className="text-center mt-16"
-        >
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Link
-              to="/templates"
-              className="inline-flex items-center px-8 py-4 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-primary-600 transition-all duration-300 hover:shadow-xl"
-            >
-              Browse All Templates
-              <svg
-                className="ml-2 w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </Link>
-          </motion.div>
         </motion.div>
       </div>
     </section>

@@ -212,7 +212,7 @@ const TemplateDetail = () => {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="block w-full text-center border-2 border-primary text-primary py-4 px-6 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300"
+                    className="block w-full text-center border-2 border-green-500 text-green-500 py-4 px-6 rounded-lg font-semibold hover:bg-green-500 hover:text-white transition-all duration-300"
                   >
                     Live Preview
                   </motion.a>
