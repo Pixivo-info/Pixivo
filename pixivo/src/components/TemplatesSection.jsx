@@ -1,11 +1,17 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 import TemplateCard from './TemplateCard';
 
 const TemplatesSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, threshold: 0.2 });
+
 
   // Featured template data with complete details matching Templates.jsx
   const templates = [
@@ -117,10 +123,10 @@ const TemplatesSection = () => {
 
         {/* Templates Carousel */}
         <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="relative"
+          className="relative overflow-visible"
         >
           {/* View More Templates Label */}
           <div className="flex justify-end mb-6">
@@ -150,48 +156,90 @@ const TemplatesSection = () => {
             </motion.div>
           </div>
 
-          {/* Carousel Container */}
-          <div className="overflow-hidden p-10">
-            <motion.div
-              className="flex gap-6"
-              animate={{
-                x: [0, -100, -200, -300, 0],
+          {/* Swiper Carousel */}
+          <div className="relative px-4 sm:px-8 lg:px-12">
+            <Swiper
+              modules={[Navigation, Pagination]}
+              spaceBetween={16}
+              slidesPerView={1}
+              navigation={{
+                prevEl: '.custom-prev',
+                nextEl: '.custom-next',
               }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: "linear",
+              pagination={{
+                clickable: true,
+                dynamicBullets: true,
               }}
+              loop={false}
+              grabCursor={true}
+              effect="slide"
+              speed={600}
+              breakpoints={{
+                480: {
+                  slidesPerView: 1,
+                  spaceBetween: 16,
+                  centeredSlides: false,
+                },
+                640: {
+                  slidesPerView: 1.5,
+                  spaceBetween: 20,
+                  centeredSlides: false,
+                },
+                768: {
+                  slidesPerView: 2,
+                  spaceBetween: 24,
+                },
+                1024: {
+                  slidesPerView: 2.5,
+                  spaceBetween: 24,
+                },
+                1280: {
+                  slidesPerView: 2.8,
+                  spaceBetween: 30,
+                },
+                1440: {
+                  slidesPerView: 3.2,
+                  spaceBetween: 30,
+                },
+              }}
+              className="templates-swipera "
             >
-              {/* Duplicate templates for seamless loop */}
-              {[...templates, ...templates].map((template, index) => (
-                <motion.div
-                  key={`${template.id}-${index}`}
-                  className="flex-shrink-0 w-96 h-96"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.6, delay: (index % templates.length) * 0.1 }}
-                >
-                  <TemplateCard template={template} index={index % templates.length} />
-                </motion.div>
+              {templates.map((template, index) => (
+                <SwiperSlide key={template.id}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className="h-full"
+                  >
+                    <TemplateCard template={template} index={index} />
+                  </motion.div>
+                </SwiperSlide>
               ))}
-            </motion.div>
-          </div>
+            </Swiper>
 
-          {/* Manual Navigation Cards for Mobile */}
-          <div className="md:hidden mt-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {templates.slice(0, 4).map((template, index) => (
-                <motion.div
-                  key={template.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                >
-                  <TemplateCard template={template} index={index} />
-                </motion.div>
-              ))}
-            </div>
+            {/* Custom Navigation Arrows */}
+            <button className="custom-prev absolute left-0 sm:left-2 lg:left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-primary hover:shadow-xl transition-all duration-300 group hover:bg-gray-50">
+              <svg 
+                className="w-5 h-5 sm:w-6 sm:h-6 transform group-hover:scale-110 transition-transform duration-200" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button className="custom-next absolute right-0 sm:right-2 lg:right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:text-primary hover:shadow-xl transition-all duration-300 group hover:bg-gray-50">
+              <svg 
+                className="w-5 h-5 sm:w-6 sm:h-6 transform group-hover:scale-110 transition-transform duration-200" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </motion.div>
       </div>

@@ -37,7 +37,7 @@ const TemplateCard = ({ template, index }) => {
       className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100"
     >
       {/* Template Image */}
-      <div className="relative overflow-hidden h-48">
+      <div className="relative overflow-hidden h-48 ">
         <img
           src={template.image}
           alt={template.title}
@@ -61,7 +61,7 @@ const TemplateCard = ({ template, index }) => {
       </div>
 
       {/* Card Content */}
-      <div className="p-6">
+      <div className="p-5">
         {/* Title */}
         <h3 className="text-xl font-bold font-syne text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300">
           {template.title}
