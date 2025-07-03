@@ -1,18 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectCoverflow } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-coverflow';
 import TemplateCard from './TemplateCard';
 
 const TemplatesSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, threshold: 0.1 });
-  const [swiperRef, setSwiperRef] = useState(null);
 
   // Template data
   const templates = [
@@ -122,7 +115,7 @@ const TemplatesSection = () => {
 
 
 
-        {/* Swiper Carousel Section */}
+        {/* Templates Grid Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -130,7 +123,7 @@ const TemplatesSection = () => {
           className="relative w-full"
         >
           {/* Section Header */}
-          <div className="flex flex-col lg:flex-row justify-between items-center mb-6 sm:mb-8 w-full max-w-6xl mx-auto px-4 sm:px-0">
+          <div className="flex flex-col lg:flex-row justify-between items-center mb-8 w-full max-w-6xl mx-auto px-4 sm:px-0">
             <div className="text-center lg:text-left mb-4 lg:mb-0">
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 All Templates
@@ -151,104 +144,20 @@ const TemplatesSection = () => {
             </Link>
           </div>
 
-          {/* Main Swiper Container */}
+          {/* Templates Grid */}
           {templates.length > 0 ? (
-            <div className="relative w-full flex justify-center">
-              {/* Main Container with Overflow Hidden */}
-              <div className="relative bg-white rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden w-full max-w-6xl">
-                
-                {/* Visible Area Mask */}
-                <div className="absolute inset-0 pointer-events-none z-10">
-                  {/* Left fade */}
-                  <div className="absolute left-0 top-0 w-8 h-full bg-gradient-to-r from-white to-transparent z-20"></div>
-                  {/* Right fade */}
-                  <div className="absolute right-0 top-0 w-8 h-full bg-gradient-to-l from-white to-transparent z-20"></div>
-                </div>
-
-                <Swiper
-                  modules={[Navigation, Pagination, Autoplay]}
-                  onSwiper={setSwiperRef}
-                  spaceBetween={24}
-                  slidesPerView={'auto'}
-                  centeredSlides={false}
-                  navigation={{
-                    nextEl: '.swiper-button-next-custom',
-                    prevEl: '.swiper-button-prev-custom',
-                  }}
-                  pagination={{
-                    el: '.swiper-pagination-custom',
-                    clickable: true,
-                    dynamicBullets: true,
-                  }}
-                  autoplay={{
-                    delay: 4000,
-                    disableOnInteraction: false,
-                    pauseOnMouseEnter: true,
-                  }}
-                  breakpoints={{
-                    320: {
-                      slidesPerView: 1,
-                      spaceBetween: 12,
-                      centeredSlides: true,
-                    },
-                    480: {
-                      slidesPerView: 1.3,
-                      spaceBetween: 16,
-                      centeredSlides: false,
-                    },
-                    640: {
-                      slidesPerView: 2,
-                      spaceBetween: 18,
-                      centeredSlides: false,
-                    },
-                    768: {
-                      slidesPerView: 2.2,
-                      spaceBetween: 20,
-                      centeredSlides: false,
-                    },
-                    1024: {
-                      slidesPerView: 3,
-                      spaceBetween: 24,
-                      centeredSlides: false,
-                    },
-                    1280: {
-                      slidesPerView: 3.2,
-                      spaceBetween: 24,
-                      centeredSlides: false,
-                    },
-                  }}
-                  className="templates-swiper"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto px-4 sm:px-0">
+              {templates.map((template, index) => (
+                <motion.div
+                  key={template.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="h-full"
                 >
-                  {templates.map((template, index) => (
-                    <SwiperSlide key={template.id} className="!w-80">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        className="h-full"
-                      >
-                        <TemplateCard template={template} index={index} />
-                      </motion.div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-
-                {/* Custom Navigation */}
-                <div className="swiper-button-prev-custom absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 cursor-pointer group border border-gray-200">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </div>
-                
-                <div className="swiper-button-next-custom absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 cursor-pointer group border border-gray-200">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-
-                {/* Custom Pagination */}
-                <div className="swiper-pagination-custom flex justify-center items-center mt-6 w-full"></div>
-              </div>
+                  <TemplateCard template={template} index={index} />
+                </motion.div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-16">
@@ -265,121 +174,6 @@ const TemplatesSection = () => {
 
       
       </div>
-
-      {/* Custom Styles */}
-      <style jsx>{`
-        .templates-swiper {
-          padding: 20px 0;
-          overflow: visible;
-          margin: 0 auto;
-          width: 100%;
-          max-width: 100%;
-        }
-        
-        .templates-swiper .swiper-wrapper {
-          align-items: center;
-        }
-        
-        .templates-swiper .swiper-slide {
-          height: auto;
-          transition: all 0.3s ease;
-          opacity: 1;
-        }
-        
-        /* Cards that go behind the container edges */
-        .templates-swiper .swiper-slide:first-child,
-        .templates-swiper .swiper-slide:last-child {
-          opacity: 0.6;
-        }
-        
-        .swiper-pagination-custom {
-          display: flex !important;
-          justify-content: center !important;
-          align-items: center !important;
-          width: 100% !important;
-          position: relative !important;
-        }
-        
-        .swiper-pagination-custom .swiper-pagination-bullet {
-          width: 10px;
-          height: 10px;
-          background: #d1d5db;
-          opacity: 1;
-          margin: 0 4px;
-          transition: all 0.3s ease;
-          border-radius: 50%;
-          cursor: pointer;
-        }
-        
-        .swiper-pagination-custom .swiper-pagination-bullet-active {
-          width: 24px;
-          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-          border-radius: 5px;
-        }
-        
-        .swiper-button-prev-custom:hover,
-        .swiper-button-next-custom:hover {
-          transform: translateY(-50%) scale(1.1);
-        }
-        
-        /* Responsive card widths */
-        .templates-swiper .swiper-slide {
-          width: 320px !important;
-          flex-shrink: 0;
-        }
-        
-        /* Large tablets and small desktops */
-        @media (max-width: 1280px) {
-          .templates-swiper .swiper-slide {
-            width: 300px !important;
-          }
-        }
-        
-        /* Tablets */
-        @media (max-width: 1024px) {
-          .templates-swiper .swiper-slide {
-            width: 280px !important;
-          }
-        }
-        
-        /* Small tablets */
-        @media (max-width: 768px) {
-          .templates-swiper {
-            margin: 0 auto;
-            width: 100%;
-            padding: 15px 0;
-          }
-          
-          .templates-swiper .swiper-slide {
-            width: 260px !important;
-          }
-        }
-        
-        /* Large phones */
-        @media (max-width: 640px) {
-          .templates-swiper .swiper-slide {
-            width: 240px !important;
-          }
-        }
-        
-        /* Small phones */
-        @media (max-width: 480px) {
-          .templates-swiper {
-            padding: 10px 0;
-          }
-          
-          .templates-swiper .swiper-slide {
-            width: 220px !important;
-          }
-        }
-        
-        /* Extra small phones */
-        @media (max-width: 380px) {
-          .templates-swiper .swiper-slide {
-            width: 200px !important;
-          }
-        }
-      `}</style>
     </section>
   );
 };
