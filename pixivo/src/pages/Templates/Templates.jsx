@@ -181,7 +181,7 @@ const Templates = () => {
       <Navbar />
       
       {/* Page Header */}
-      <section className="bg-white py-16">
+      <section className="bg-white py-16 pt-36">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

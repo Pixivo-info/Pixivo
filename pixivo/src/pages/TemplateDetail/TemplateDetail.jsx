@@ -89,30 +89,8 @@ const TemplateDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      {/* Breadcrumb */}
-      <section className="bg-white py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.nav
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex items-center space-x-2 text-sm"
-          >
-            <Link to="/" className="text-gray-500 hover:text-primary transition-colors">
-              Home
-            </Link>
-            <span className="text-gray-300">/</span>
-            <Link to="/templates" className="text-gray-500 hover:text-primary transition-colors">
-              Templates
-            </Link>
-            <span className="text-gray-300">/</span>
-            <span className="text-gray-900 font-medium">{template.title}</span>
-          </motion.nav>
-        </div>
-      </section>
-
       {/* Template Detail Content */}
-      <section ref={ref} className="py-16">
+      <section ref={ref} className="py-16 pt-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             {/* Template Preview */}
