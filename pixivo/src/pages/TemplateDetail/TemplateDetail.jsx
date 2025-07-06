@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import TemplateCard from '../../components/TemplateCard';
+import card1 from '../../assets/images/card1.webp';
 
 const TemplateDetail = () => {
   const { id } = useParams();
@@ -18,7 +19,7 @@ const TemplateDetail = () => {
     rating: 5,
     downloads: "2.3k",
     category: "dashboard",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+    image: card1,
     description: "A comprehensive dashboard template designed for modern web applications. This template features a clean, intuitive interface with advanced data visualization components, responsive design, and customizable layouts perfect for admin panels, analytics dashboards, and business intelligence applications.",
     fullDescription: "This premium dashboard template is crafted with attention to detail and modern design principles. Built with React and styled using Tailwind CSS, it offers a perfect foundation for creating professional admin interfaces and data visualization platforms. The template includes multiple layout options, dark/light theme support, and a comprehensive component library.",
     features: [
@@ -105,7 +106,7 @@ const TemplateDetail = () => {
                   alt={template.title}
                   className="w-full h-auto group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
+              
                 
                 {/* Live Preview Button */}
                 <motion.div

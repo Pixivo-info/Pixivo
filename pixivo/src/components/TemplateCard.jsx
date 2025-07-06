@@ -43,7 +43,7 @@ const TemplateCard = ({ template, index }) => {
           alt={template.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300" />
+      
         
         {/* Preview button overlay */}
         <motion.div

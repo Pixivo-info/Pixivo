@@ -139,7 +139,7 @@ const Navbar = () => {
           >
             <Link to="/" className="flex items-center space-x-3">
               <motion.div 
-                className="relative p-2 rounded-lg bg-blue-500/20 border border-blue-500/30"
+                className="relative p-2 rounded-lg border border-blue-500/30"
                 animate={glowAnimation}
               >
                 <img 
@@ -147,7 +147,7 @@ const Navbar = () => {
                   alt="Pixivo Logo" 
                   className="h-8 w-8 object-contain"
                 />
-                <div className="absolute inset-0 bg-blue-500/10 rounded-lg blur-sm"></div>
+                <div className="absolute inset-0 rounded-lg "></div>
               </motion.div>
               <span className="text-2xl font-bold font-syne text-blue-400">
                 Pixivo
