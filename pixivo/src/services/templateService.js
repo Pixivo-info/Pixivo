@@ -17,6 +17,8 @@ import { supabase, supabaseAdmin, handleSupabaseError, TABLES } from '../lib/sup
  */
 export const getPublishedTemplates = async (options = {}) => {
   try {
+    console.log('📊 Fetching published templates with options:', options);
+    
     let query = supabase
       .from(TABLES.TEMPLATES)
       .select('*')
@@ -47,12 +49,36 @@ export const getPublishedTemplates = async (options = {}) => {
       query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`)
     }
 
+    console.log('📤 Executing published templates query...');
     const { data, error } = await query
 
-    handleSupabaseError(error)
+    console.log('📥 Published templates response:', { data, error, count: data?.length });
+
+    if (error) {
+      console.error('❌ Supabase error:', error);
+      handleSupabaseError(error)
+    }
+
+    if (!data || data.length === 0) {
+      console.warn('⚠️ No published templates found');
+      console.log('💡 Checking if any templates exist at all...');
+      
+      // Check if ANY templates exist
+      const { data: allTemplates, error: allError } = await supabase
+        .from(TABLES.TEMPLATES)
+        .select('id, title, status')
+        .limit(10);
+        
+      console.log('📋 All templates (any status):', allTemplates);
+      if (allError) {
+        console.error('❌ Error checking all templates:', allError);
+      }
+    }
+
+    console.log('✅ Returning published templates:', data?.length || 0, 'found');
     return data || []
   } catch (error) {
-    console.error('Error fetching published templates:', error)
+    console.error('💥 Unexpected error fetching published templates:', error)
     throw error
   }
 }
@@ -102,6 +128,8 @@ export const getTemplateById = async (id, isAdmin = false) => {
   try {
     const client = isAdmin ? supabaseAdmin : supabase
     
+    console.log('🔍 getTemplateById called with:', { id, isAdmin, client: isAdmin ? 'admin' : 'public' });
+    
     // Build query conditions
     let query = client
       .from(TABLES.TEMPLATES)
@@ -110,21 +138,33 @@ export const getTemplateById = async (id, isAdmin = false) => {
     if (isAdmin) {
       // Admin can see any template by ID
       query = query.eq('id', id)
+      console.log('👑 Admin query for template ID:', id);
     } else {
       // Public can only see published templates
       query = query.eq('id', id).eq('status', 'published')
+      console.log('👤 Public query for template ID:', id, 'with status published');
     }
 
+    console.log('📤 Executing query...');
     const { data, error } = await query.maybeSingle()
 
+    console.log('📥 Query response:', { data, error });
+
     if (error) {
-      console.error('Supabase error fetching template:', error)
+      console.error('❌ Supabase error fetching template:', error)
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return null
     }
 
+    console.log('✅ Template fetched successfully:', data);
     return data
   } catch (error) {
-    console.error('Error fetching template by ID:', error)
+    console.error('💥 Unexpected error fetching template by ID:', error)
     return null
   }
 }
