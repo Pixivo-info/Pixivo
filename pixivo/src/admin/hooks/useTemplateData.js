@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
-import { getStoredTemplates, saveTemplatesToStorage } from '../utils/adminData';
+import {
+  getAllTemplates,
+  createTemplate,
+  updateTemplate,
+  deleteTemplate,
+  toggleTemplateFeatured,
+  updateTemplateStatus
+} from '../../services/templateService';
 
 /**
  * Custom hook for managing template data
@@ -19,7 +26,7 @@ export const useTemplateData = () => {
     try {
       setLoading(true);
       setError(null);
-      const templateData = getStoredTemplates();
+      const templateData = await getAllTemplates();
       setTemplates(templateData);
     } catch (err) {
       setError('Failed to load templates');
@@ -29,52 +36,79 @@ export const useTemplateData = () => {
     }
   };
 
-  const saveTemplates = async (updatedTemplates) => {
+  const addTemplate = async (newTemplate) => {
     try {
-      saveTemplatesToStorage(updatedTemplates);
-      setTemplates(updatedTemplates);
+      const createdTemplate = await createTemplate(newTemplate);
+      setTemplates(prev => [...prev, createdTemplate]);
       return true;
     } catch (err) {
-      setError('Failed to save templates');
-      console.error('Error saving templates:', err);
+      setError('Failed to create template');
+      console.error('Error creating template:', err);
       return false;
     }
   };
 
-  const addTemplate = async (newTemplate) => {
-    const updatedTemplates = [...templates, newTemplate];
-    return await saveTemplates(updatedTemplates);
+  const updateTemplateData = async (templateId, updatedData) => {
+    try {
+      const updatedTemplate = await updateTemplate(templateId, updatedData);
+      setTemplates(prev => prev.map(template =>
+        template.id === templateId ? updatedTemplate : template
+      ));
+      return true;
+    } catch (err) {
+      setError('Failed to update template');
+      console.error('Error updating template:', err);
+      return false;
+    }
   };
 
-  const updateTemplate = async (templateId, updatedData) => {
-    const updatedTemplates = templates.map(template =>
-      template.id === templateId
-        ? { ...template, ...updatedData, updatedAt: new Date().toISOString().split('T')[0] }
-        : template
-    );
-    return await saveTemplates(updatedTemplates);
-  };
-
-  const deleteTemplate = async (templateId) => {
-    const updatedTemplates = templates.filter(template => template.id !== templateId);
-    return await saveTemplates(updatedTemplates);
+  const deleteTemplateData = async (templateId) => {
+    try {
+      await deleteTemplate(templateId);
+      setTemplates(prev => prev.filter(template => template.id !== templateId));
+      return true;
+    } catch (err) {
+      setError('Failed to delete template');
+      console.error('Error deleting template:', err);
+      return false;
+    }
   };
 
   const toggleFeatured = async (templateId) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      return await updateTemplate(templateId, { featured: !template.featured });
+    try {
+      const template = templates.find(t => t.id === templateId);
+      if (template) {
+        const updatedTemplate = await toggleTemplateFeatured(templateId, !template.featured);
+        setTemplates(prev => prev.map(t =>
+          t.id === templateId ? updatedTemplate : t
+        ));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      setError('Failed to toggle featured status');
+      console.error('Error toggling featured status:', err);
+      return false;
     }
-    return false;
   };
 
   const toggleStatus = async (templateId) => {
-    const template = templates.find(t => t.id === templateId);
-    if (template) {
-      const newStatus = template.status === 'published' ? 'draft' : 'published';
-      return await updateTemplate(templateId, { status: newStatus });
+    try {
+      const template = templates.find(t => t.id === templateId);
+      if (template) {
+        const newStatus = template.status === 'published' ? 'draft' : 'published';
+        const updatedTemplate = await updateTemplateStatus(templateId, newStatus);
+        setTemplates(prev => prev.map(t =>
+          t.id === templateId ? updatedTemplate : t
+        ));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      setError('Failed to toggle status');
+      console.error('Error toggling status:', err);
+      return false;
     }
-    return false;
   };
 
   const getTemplate = (templateId) => {
@@ -136,8 +170,8 @@ export const useTemplateData = () => {
     error,
     loadTemplates,
     addTemplate,
-    updateTemplate,
-    deleteTemplate,
+    updateTemplate: updateTemplateData,
+    deleteTemplate: deleteTemplateData,
     toggleFeatured,
     toggleStatus,
     getTemplate,

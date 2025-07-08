@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import TemplateCard from '../../components/TemplateCard';
 import Footer from '../../components/Footer';
+import { getPublishedTemplates, getTemplateCategories } from '../../services/templateService';
 
 const Templates = () => {
   const ref = useRef(null);
@@ -11,145 +12,83 @@ const Templates = () => {
   
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [allTemplates, setAllTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Scroll to top when page loads
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Extended template data - replace with real data from API
-  const allTemplates = useMemo(() => [
-    {
-      id: 1,
-      title: "Modern Dashboard",
-      budget: 49,
-      rating: 5,
-      downloads: "2.3k",
-      category: "dashboard",
-      image: "https://res.cloudinary.com/dmsg2vpgy/image/upload/v1751864340/card1_bzp9dt.webp",
-      technologies: ["HTML", "CSS", "JS", "REACT"]
-    },
-    {
-      id: 2,
-      title: "E-commerce UI Kit",
-      budget: 79,
-      rating: 4,
-      downloads: "1.8k",
-      category: "ecommerce",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "JS", "BOOTSTRAP"]
-    },
-    {
-      id: 3,
-      title: "Mobile App Design",
-      budget: 65,
-      rating: 5,
-      downloads: "3.1k",
-      category: "mobile",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop",
-      technologies: ["REACT", "CSS", "JS", "TAILWIND"]
-    },
-    {
-      id: 4,
-      title: "Landing Page Template",
-      budget: 0,
-      rating: 4,
-      downloads: "1.5k",
-      category: "landing",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "JS", "BOOTSTRAP"]
-    },
-    {
-      id: 5,
-      title: "Portfolio Website",
-      budget: 45,
-      rating: 5,
-      downloads: "2.7k",
-      category: "portfolio",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "JS", "SCSS"]
-    },
-    {
-      id: 6,
-      title: "Admin Panel UI",
-      budget: 89,
-      rating: 4,
-      downloads: "1.9k",
-      category: "dashboard",
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop",
-      technologies: ["VUE", "CSS", "JS", "BOOTSTRAP"]
-    },
-    {
-      id: 7,
-      title: "Blog Template",
-      budget: 0,
-      rating: 4,
-      downloads: "1.2k",
-      category: "blog",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "PHP", "MYSQL"]
-    },
-    {
-      id: 8,
-      title: "SaaS Landing Page",
-      budget: 55,
-      rating: 5,
-      downloads: "2.8k",
-      category: "landing",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
-      technologies: ["NEXT.JS", "CSS", "JS", "TAILWIND"]
-    },
-    {
-      id: 9,
-      title: "Restaurant Website",
-      budget: 42,
-      rating: 4,
-      downloads: "1.6k",
-      category: "business",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "JS", "JQUERY"]
-    },
-    {
-      id: 10,
-      title: "Social Media App",
-      budget: 75,
-      rating: 5,
-      downloads: "3.5k",
-      category: "mobile",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop",
-      technologies: ["REACT", "NODE.JS", "MONGODB", "CSS"]
-    },
-    {
-      id: 11,
-      title: "Finance Dashboard",
-      budget: 95,
-      rating: 5,
-      downloads: "2.1k",
-      category: "dashboard",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
-      technologies: ["ANGULAR", "TYPESCRIPT", "CSS", "BOOTSTRAP"]
-    },
-    {
-      id: 12,
-      title: "Agency Portfolio",
-      budget: 0,
-      rating: 4,
-      downloads: "1.4k",
-      category: "portfolio",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "JS", "GSAP"]
-    }
-  ], []);
+  // Fetch templates from Supabase
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getPublishedTemplates();
+        
+        // Transform database fields to match component expectations
+        const transformedData = data.map(template => ({
+          id: template.id,
+          title: template.title,
+          budget: template.budget,
+          rating: template.rating,
+          downloads: template.downloads,
+          category: template.category,
+          image: template.image_url,
+          technologies: template.technologies || []
+        }));
+        
+        setAllTemplates(transformedData);
+      } catch (err) {
+        console.error('Error fetching templates:', err);
+        setError('Failed to load templates');
+        setAllTemplates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const categories = useMemo(() => [
-    { id: 'all', name: 'All', count: allTemplates.length },
-    { id: 'latest', name: 'Latest', count: allTemplates.filter(t => t.id >= 9).length }, // Latest templates (newer IDs)
-    { id: 'popular', name: 'Popular', count: allTemplates.filter(t => parseInt(t.downloads.replace('k', '')) >= 2.5).length }, // High downloads
-    { id: 'portfolio', name: 'Portfolio', count: allTemplates.filter(t => t.category === 'portfolio').length },
-    { id: 'business', name: 'Business', count: allTemplates.filter(t => t.category === 'business').length },
-    { id: 'ecommerce', name: 'E-Commerce', count: allTemplates.filter(t => t.category === 'ecommerce').length },
-    { id: 'landing', name: 'Landing', count: allTemplates.filter(t => t.category === 'landing').length },
-  ], [allTemplates]);
+    fetchTemplates();
+  }, []);
+
+  // Dynamic categories based on actual template data
+  const categories = useMemo(() => {
+    if (!allTemplates.length) return [];
+    
+    const basCategories = [
+      { id: 'all', name: 'All', count: allTemplates.length },
+      { id: 'latest', name: 'Latest', count: allTemplates.filter(t => {
+        const templateDate = new Date(t.created_at || Date.now());
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return templateDate >= thirtyDaysAgo;
+      }).length },
+      { id: 'popular', name: 'Popular', count: allTemplates.filter(t => {
+        const downloads = parseInt(t.downloads.replace('k', '')) || 0;
+        return downloads >= 2;
+      }).length }
+    ];
+
+    // Get unique categories from templates
+    const templateCategories = [...new Set(allTemplates.map(t => t.category))];
+    
+    // Add category-specific filters
+    templateCategories.forEach(category => {
+      const count = allTemplates.filter(t => t.category === category).length;
+      if (count > 0) {
+        basCategories.push({
+          id: category,
+          name: category.charAt(0).toUpperCase() + category.slice(1),
+          count
+        });
+      }
+    });
+
+    return basCategories;
+  }, [allTemplates]);
 
   // Optimized filter function using useMemo for better performance
   const filteredTemplates = useMemo(() => {
@@ -366,60 +305,91 @@ const Templates = () => {
             </p>
           </motion.div>
 
-          {/* Templates Grid */}
-          <motion.div
-            key={selectedCategory} // Force re-render when category changes
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 px-2 md:px-0"
-          >
-            {filteredTemplates.map((template, index) => (
+          {/* Templates Grid with Loading and Error States */}
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                <svg className="w-10 h-10 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">Loading Templates...</h3>
+              <p className="text-gray-600 text-lg">Please wait while we fetch the latest templates.</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">Error Loading Templates</h3>
+              <p className="text-gray-600 text-lg">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Templates Grid */}
               <motion.div
-                key={template.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.3, delay: index * 0.03 }}
+                key={selectedCategory} // Force re-render when category changes
+                variants={containerVariants}
+                initial="hidden"
+                animate={isInView ? "visible" : "hidden"}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 px-2 md:px-0"
               >
-                <TemplateCard template={template} index={index} />
+                {filteredTemplates.map((template, index) => (
+                  <motion.div
+                    key={template.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                  >
+                    <TemplateCard template={template} index={index} />
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
 
-          {/* No Results */}
-          {filteredTemplates.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16"
-            >
-              <svg
-                className="w-16 h-16 text-gray-300 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No templates found</h3>
-              <p className="text-gray-600 mb-6">Try adjusting your filters or search terms</p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setSearchTerm('');
-                }}
-                className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors duration-300"
-              >
-                Clear Filters
-              </motion.button>
-            </motion.div>
+              {/* No Results */}
+              {filteredTemplates.length === 0 && !loading && !error && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-16"
+                >
+                  <svg
+                    className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No templates found</h3>
+                  <p className="text-gray-600 mb-6">Try adjusting your filters or search terms</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setSearchTerm('');
+                    }}
+                    className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors duration-300"
+                  >
+                    Clear Filters
+                  </motion.button>
+                </motion.div>
+              )}
+            </>
           )}
 
         </div>

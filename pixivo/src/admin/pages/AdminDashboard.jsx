@@ -1,43 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { getStoredTemplates } from '../utils/adminData';
+import { getTemplateStats, getAllTemplates } from '../../services/templateService';
 
 const AdminDashboard = () => {
   const [templates, setTemplates] = useState([]);
   const [stats, setStats] = useState({
     totalTemplates: 0,
     publishedTemplates: 0,
-    totalDownloads: 0,
+    draftTemplates: 0,
     featuredTemplates: 0,
-    categories: 0,
-    averageRating: 0
+    totalDownloads: 0,
+    averageRating: 0,
+    categoriesCount: 0
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadData = () => {
-      const templateData = getStoredTemplates();
-      setTemplates(templateData);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch templates and statistics from Supabase
+        const [templateData, statsData] = await Promise.all([
+          getAllTemplates(),
+          getTemplateStats()
+        ]);
 
-      // Calculate statistics
-      const totalTemplates = templateData.length;
-      const publishedTemplates = templateData.filter(t => t.status === 'published').length;
-      const totalDownloads = templateData.reduce((sum, t) => {
-        const downloads = parseFloat(t.downloads.replace('k', '')) * 1000;
-        return sum + downloads;
-      }, 0);
-      const featuredTemplates = templateData.filter(t => t.featured).length;
-      const categories = [...new Set(templateData.map(t => t.category))].length;
-      const averageRating = templateData.reduce((sum, t) => sum + t.rating, 0) / templateData.length;
-
-      setStats({
-        totalTemplates,
-        publishedTemplates,
-        totalDownloads,
-        featuredTemplates,
-        categories,
-        averageRating: Math.round(averageRating * 10) / 10
-      });
+        setTemplates(templateData);
+        setStats(statsData);
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadData();
@@ -105,6 +104,44 @@ const AdminDashboard = () => {
     };
     return colorMap[color] || colorMap.blue;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Dashboard...</h3>
+          <p className="text-gray-600">Please wait while we fetch your data.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Error Loading Dashboard</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -255,7 +292,7 @@ const AdminDashboard = () => {
                 className="flex items-center space-x-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
               >
                 <img
-                  src={template.image}
+                  src={template.image_url || template.image}
                   alt={template.title}
                   className="w-12 h-12 rounded-lg object-cover"
                 />

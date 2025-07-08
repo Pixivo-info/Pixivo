@@ -1,81 +1,52 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import TemplateCard from './TemplateCard';
+import { getFeaturedTemplates } from '../services/templateService';
 
 const TemplatesSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, threshold: 0.1 });
+  
+  // State for templates from Supabase
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Template data
-  const templates = [
-    {
-      id: 1,
-      title: "Modern Dashboard",
-      budget: 49,
-      rating: 5,
-      downloads: "2.3k",
-      category: "dashboard",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
-      technologies: ["React", "CSS", "JavaScript"],
-      featured: true
-    },
-    {
-      id: 2,
-      title: "E-commerce Store",
-      budget: 79,
-      rating: 4,
-      downloads: "1.8k",
-      category: "ecommerce",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop",
-      technologies: ["Vue.js", "CSS", "Bootstrap"],
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Mobile App Design",
-      budget: 65,
-      rating: 5,
-      downloads: "3.1k",
-      category: "mobile",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop",
-      technologies: ["React Native", "CSS"],
-      featured: true
-    },
-    {
-      id: 4,
-      title: "Business Landing",
-      budget: 0,
-      rating: 4,
-      downloads: "1.5k",
-      category: "landing",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
-      technologies: ["HTML", "CSS", "JavaScript"],
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Portfolio Website",
-      budget: 45,
-      rating: 5,
-      downloads: "2.7k",
-      category: "portfolio",
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop",
-      technologies: ["Next.js", "CSS"],
-      featured: true
-    },
-    {
-      id: 6,
-      title: "Admin Panel",
-      budget: 89,
-      rating: 4,
-      downloads: "1.9k",
-      category: "dashboard",
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop",
-      technologies: ["Angular", "CSS"],
-      featured: false
-    }
-  ];
+  // Fetch featured templates from Supabase
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getFeaturedTemplates(6); // Get 6 featured templates
+        
+        // Transform database fields to match component expectations
+        const transformedData = data.map(template => ({
+          id: template.id,
+          title: template.title,
+          budget: template.budget,
+          rating: template.rating,
+          downloads: template.downloads,
+          category: template.category,
+          image: template.image_url, // Map database field to component field
+          technologies: template.technologies || [],
+          featured: template.featured
+        }));
+        
+        setTemplates(transformedData);
+      } catch (err) {
+        console.error('Error fetching featured templates:', err);
+        setError('Failed to load templates');
+        // Fallback to empty array
+        setTemplates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
 
 
@@ -145,7 +116,33 @@ const TemplatesSection = () => {
           </div>
 
           {/* Templates Grid */}
-          {templates.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                <svg className="w-10 h-10 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">Loading Templates...</h3>
+              <p className="text-gray-600 text-lg">Please wait while we fetch the latest templates.</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">Error Loading Templates</h3>
+              <p className="text-gray-600 text-lg">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : templates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto px-4 sm:px-0">
               {templates.map((template, index) => (
                 <motion.div
@@ -167,7 +164,7 @@ const TemplatesSection = () => {
                 </svg>
               </div>
               <h3 className="text-2xl font-semibold text-gray-800 mb-3">No Templates Found</h3>
-              <p className="text-gray-600 text-lg">Try selecting a different category to explore more templates.</p>
+              <p className="text-gray-600 text-lg">No featured templates available at the moment.</p>
             </div>
           )}
         </motion.div>
