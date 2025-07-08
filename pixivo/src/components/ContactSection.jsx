@@ -27,7 +27,7 @@ const ContactSection = () => {
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    console.log('Form submitted:', formData);
+    // TODO: Implement actual form submission to backend/email service
     setIsSubmitting(false);
     
     // Reset form

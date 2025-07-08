@@ -46,7 +46,7 @@ const TemplateCard = ({ template, index }) => {
       {/* Template Image */}
       <div className="relative overflow-hidden h-48 ">
         <img
-          src={template.image}
+          src={template.image_url || template.image}
           alt={template.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
@@ -144,7 +144,7 @@ const TemplateCard = ({ template, index }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 // Handle download logic here
-                console.log('Download template:', template.id);
+                // TODO: Implement actual download functionality
               }}
             >
               <svg className="w-4 h-4 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

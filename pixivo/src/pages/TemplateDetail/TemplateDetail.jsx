@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import TemplateCard from '../../components/TemplateCard';
+import { getTemplateById, getPublishedTemplates } from '../../services/templateService';
 
 
 const TemplateDetail = () => {
@@ -11,10 +12,86 @@ const TemplateDetail = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, threshold: 0.1 });
   const [isFullScreenOpen, setIsFullScreenOpen] = useState(false);
+  const [template, setTemplate] = useState(null);
+  const [relatedTemplates, setRelatedTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Scroll to top when page loads
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, [id]);
+
+  // Fetch template data from Supabase
+  useEffect(() => {
+    const fetchTemplateData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const [templateData, allTemplates] = await Promise.all([
+          getTemplateById(parseInt(id), false), // false for public access
+          getPublishedTemplates({ limit: 4 }) // Get 4 for related
+        ]);
+
+        if (templateData) {
+          // Transform database fields to component format
+          const transformedTemplate = {
+            id: templateData.id,
+            title: templateData.title,
+            budget: templateData.budget,
+            rating: templateData.rating,
+            downloads: templateData.downloads,
+            category: templateData.category,
+            image: templateData.image_url,
+            description: templateData.description,
+            fullDescription: templateData.full_description || templateData.description,
+            features: templateData.features || [],
+            technologies: templateData.technologies || [],
+            demoUrl: templateData.demo_url || '#',
+            downloadUrl: templateData.download_url || '#',
+            lastUpdated: new Date(templateData.updated_at).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }),
+            version: templateData.version || '1.0.0',
+            fileSize: templateData.file_size || 'N/A',
+            compatibleWith: templateData.compatible_with || []
+          };
+          
+          setTemplate(transformedTemplate);
+
+          // Filter related templates (same category, different ID)
+          const related = allTemplates
+            .filter(t => t.category === templateData.category && t.id !== templateData.id)
+            .slice(0, 3)
+            .map(t => ({
+              id: t.id,
+              title: t.title,
+              budget: t.budget,
+              rating: t.rating,
+              downloads: t.downloads,
+              category: t.category,
+              image: t.image_url,
+              technologies: t.technologies || []
+            }));
+          
+          setRelatedTemplates(related);
+        } else {
+          setError('Template not found');
+        }
+      } catch (err) {
+        console.error('Error fetching template:', err);
+        setError('Failed to load template');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchTemplateData();
+    }
   }, [id]);
 
   // Handle ESC key to close modal
@@ -36,80 +113,48 @@ const TemplateDetail = () => {
     };
   }, [isFullScreenOpen]);
 
-  // Check if ID exists
-  if (!id) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Template Not Found</h1>
-          <p className="text-gray-600 mb-8">The template you're looking for doesn't exist.</p>
-          <Link to="/templates" className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300">
-            Back to Templates
-          </Link>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-96 pt-40">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Template...</h3>
+            <p className="text-gray-600">Please wait while we fetch the template details.</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Sample template data - in real app, fetch by ID
-  const template = {
-    id: parseInt(id) || 1,
-    title: "Modern Dashboard Template",
-    budget: 49,
-    rating: 5,
-    downloads: "2.3k",
-    category: "dashboard",
-    image: "https://res.cloudinary.com/dmsg2vpgy/image/upload/v1751864340/card1_bzp9dt.webp",
-    description: "A comprehensive dashboard template designed for modern web applications. This template features a clean, intuitive interface with advanced data visualization components, responsive design, and customizable layouts perfect for admin panels, analytics dashboards, and business intelligence applications.",
-    fullDescription: "This premium dashboard template is crafted with attention to detail and modern design principles. Built with React and styled using Tailwind CSS, it offers a perfect foundation for creating professional admin interfaces and data visualization platforms. The template includes multiple layout options, dark/light theme support, and a comprehensive component library.",
-    features: [
-      "Fully responsive design",
-      "React & Tailwind CSS",
-      "Dark/Light theme support", 
-      "Multiple layout options",
-      "Advanced charts & graphs",
-      "Customizable components",
-      "Clean, modern UI",
-      "Well-documented code",
-      "Regular updates",
-      "Premium support"
-    ],
-    technologies: ["React", "Tailwind CSS", "Chart.js", "Framer Motion"],
-    demoUrl: "https://demo.pixivo.com/dashboard",
-    downloadUrl: "https://download.pixivo.com/dashboard",
-    lastUpdated: "March 15, 2024",
-    version: "2.1.0",
-    fileSize: "12.4 MB",
-    compatibleWith: ["React 18+", "Next.js 13+", "Vite 4+"]
-  };
-
-  // Related templates
-  const relatedTemplates = [
-    {
-      id: 2,
-      title: "E-commerce UI Kit",
-      budget: 79,
-      rating: 4,
-      downloads: "1.8k",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Mobile App Design",
-      budget: 65,
-      rating: 5,
-      downloads: "3.1k",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop"
-    },
-    {
-      id: 4,
-      title: "Landing Page Template",
-      budget: 35,
-      rating: 4,
-      downloads: "1.5k",
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop"
-    }
-  ];
+  // Error state or template not found
+  if (error || !template || !id) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-96 pt-40">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Template Not Found</h1>
+            <p className="text-gray-600 mb-8">{error || "The template you're looking for doesn't exist."}</p>
+            <Link to="/templates" className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300">
+              Back to Templates
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (

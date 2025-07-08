@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
-  getStoredTemplates, 
-  saveTemplatesToStorage, 
-  generateId, 
   validateTemplate,
   CATEGORIES,
   TECHNOLOGIES 
 } from '../utils/adminData';
+import { 
+  getTemplateById, 
+  createTemplate, 
+  updateTemplate 
+} from '../../services/templateService';
 import CustomDropdown from '../components/CustomDropdown';
 
 const TemplateEditor = () => {
@@ -58,20 +60,42 @@ const TemplateEditor = () => {
 
   // Load template data if editing
   useEffect(() => {
-    if (isEditing) {
-      const templates = getStoredTemplates();
-      const template = templates.find(t => t.id === parseInt(id));
-      if (template) {
-        setFormData({
-          ...template,
-          features: template.features.length > 0 ? template.features : [''],
-          compatibleWith: template.compatibleWith.length > 0 ? template.compatibleWith : ['']
-        });
-        setImagePreview(template.image);
-      } else {
-        navigate('/admin/templates');
+    const loadTemplate = async () => {
+      if (isEditing) {
+        try {
+          const template = await getTemplateById(parseInt(id), true); // true for admin access
+          if (template) {
+            setFormData({
+              title: template.title || '',
+              description: template.description || '',
+              fullDescription: template.full_description || '',
+              category: template.category || '',
+              budget: template.budget || 0,
+              rating: template.rating || 5,
+              downloads: template.downloads || '0k',
+              image: template.image_url || '',
+              technologies: template.technologies || [],
+              features: template.features && template.features.length > 0 ? template.features : [''],
+              featured: template.featured || false,
+              status: template.status || 'draft',
+              demoUrl: template.demo_url || '',
+              downloadUrl: template.download_url || '',
+              version: template.version || '1.0.0',
+              fileSize: template.file_size || '',
+              compatibleWith: template.compatible_with && template.compatible_with.length > 0 ? template.compatible_with : ['']
+            });
+            setImagePreview(template.image_url || '');
+          } else {
+            navigate('/admin/templates');
+          }
+        } catch (error) {
+          console.error('Error loading template:', error);
+          navigate('/admin/templates');
+        }
       }
-    }
+    };
+
+    loadTemplate();
   }, [id, isEditing, navigate]);
 
   const handleInputChange = (e) => {
@@ -157,32 +181,34 @@ const TemplateEditor = () => {
     }
 
     try {
-      const templates = getStoredTemplates();
-      let updatedTemplates;
+      // Prepare data for Supabase (map frontend field names to database field names)
+      const templateData = {
+        title: cleanFormData.title,
+        description: cleanFormData.description,
+        fullDescription: cleanFormData.fullDescription,
+        category: cleanFormData.category,
+        budget: parseFloat(cleanFormData.budget) || 0,
+        rating: parseInt(cleanFormData.rating) || 5,
+        downloads: cleanFormData.downloads || '0k',
+        image: cleanFormData.image,
+        technologies: cleanFormData.technologies,
+        features: cleanFormData.features,
+        featured: cleanFormData.featured,
+        status: cleanFormData.status,
+        demoUrl: cleanFormData.demoUrl,
+        downloadUrl: cleanFormData.downloadUrl,
+        version: cleanFormData.version || '1.0.0',
+        fileSize: cleanFormData.fileSize,
+        compatible_with: cleanFormData.compatibleWith
+      };
 
       if (isEditing) {
         // Update existing template
-        updatedTemplates = templates.map(template =>
-          template.id === parseInt(id)
-            ? {
-                ...cleanFormData,
-                id: parseInt(id),
-                updatedAt: new Date().toISOString().split('T')[0]
-              }
-            : template
-        );
+        await updateTemplate(parseInt(id), templateData);
       } else {
         // Create new template
-        const newTemplate = {
-          ...cleanFormData,
-          id: generateId(),
-          createdAt: new Date().toISOString().split('T')[0],
-          updatedAt: new Date().toISOString().split('T')[0]
-        };
-        updatedTemplates = [...templates, newTemplate];
+        await createTemplate(templateData);
       }
-
-      saveTemplatesToStorage(updatedTemplates);
       
       // Navigate back to templates list
       navigate('/admin/templates');

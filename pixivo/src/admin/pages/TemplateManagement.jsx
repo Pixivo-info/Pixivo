@@ -1,29 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { getStoredTemplates, saveTemplatesToStorage } from '../utils/adminData';
+import { useTemplateData } from '../hooks/useTemplateData';
 import CustomDropdown from '../components/CustomDropdown';
 
 const TemplateManagement = () => {
-  const [templates, setTemplates] = useState([]);
+  const { 
+    templates, 
+    loading, 
+    error, 
+    deleteTemplate, 
+    toggleFeatured, 
+    toggleStatus 
+  } = useTemplateData();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [sortBy, setSortBy] = useState('updatedAt');
+  const [sortBy, setSortBy] = useState('updated_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedTemplates, setSelectedTemplates] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [templateToDelete, setTemplateToDelete] = useState(null);
-
-  // Load templates on component mount
-  useEffect(() => {
-    loadTemplates();
-  }, []);
-
-  const loadTemplates = () => {
-    const templateData = getStoredTemplates();
-    setTemplates(templateData);
-  };
 
   // Filter and sort templates
   const filteredTemplates = templates
@@ -59,10 +57,10 @@ const TemplateManagement = () => {
           aValue = a.rating;
           bValue = b.rating;
           break;
-        case 'updatedAt':
+        case 'updated_at':
         default:
-          aValue = new Date(a.updatedAt);
-          bValue = new Date(b.updatedAt);
+          aValue = new Date(a.updated_at || a.updatedAt);
+          bValue = new Date(b.updated_at || b.updatedAt);
           break;
       }
       
@@ -103,46 +101,31 @@ const TemplateManagement = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (templateToDelete) {
-      const updatedTemplates = templates.filter(t => t.id !== templateToDelete.id);
-      setTemplates(updatedTemplates);
-      saveTemplatesToStorage(updatedTemplates);
-      setSelectedTemplates(prev => prev.filter(id => id !== templateToDelete.id));
+      const success = await deleteTemplate(templateToDelete.id);
+      if (success) {
+        setSelectedTemplates(prev => prev.filter(id => id !== templateToDelete.id));
+      }
     }
     setShowDeleteModal(false);
     setTemplateToDelete(null);
   };
 
-  const handleBulkDelete = () => {
-    const updatedTemplates = templates.filter(t => !selectedTemplates.includes(t.id));
-    setTemplates(updatedTemplates);
-    saveTemplatesToStorage(updatedTemplates);
+  const handleBulkDelete = async () => {
+    // Delete templates one by one (could be optimized with bulk delete in service)
+    for (const templateId of selectedTemplates) {
+      await deleteTemplate(templateId);
+    }
     setSelectedTemplates([]);
   };
 
-  const toggleFeatured = (templateId) => {
-    const updatedTemplates = templates.map(template => 
-      template.id === templateId 
-        ? { ...template, featured: !template.featured, updatedAt: new Date().toISOString().split('T')[0] }
-        : template
-    );
-    setTemplates(updatedTemplates);
-    saveTemplatesToStorage(updatedTemplates);
+  const handleToggleFeatured = async (templateId) => {
+    await toggleFeatured(templateId);
   };
 
-  const toggleStatus = (templateId) => {
-    const updatedTemplates = templates.map(template => 
-      template.id === templateId 
-        ? { 
-            ...template, 
-            status: template.status === 'published' ? 'draft' : 'published',
-            updatedAt: new Date().toISOString().split('T')[0]
-          }
-        : template
-    );
-    setTemplates(updatedTemplates);
-    saveTemplatesToStorage(updatedTemplates);
+  const handleToggleStatus = async (templateId) => {
+    await toggleStatus(templateId);
   };
 
   const categories = [...new Set(templates.map(t => t.category))];
@@ -175,6 +158,46 @@ const TemplateManagement = () => {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
     </svg>
   );
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Templates...</h3>
+          <p className="text-gray-600">Please wait while we fetch your templates.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Error Loading Templates</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -367,7 +390,7 @@ const TemplateManagement = () => {
                   <td className="px-4 py-4">
                     <div className="flex items-center">
                       <img
-                        src={template.image}
+                        src={template.image_url || template.image}
                         alt={template.title}
                         className="h-10 w-10 rounded-lg object-cover mr-3 flex-shrink-0"
                       />
@@ -422,7 +445,7 @@ const TemplateManagement = () => {
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <button
-                      onClick={() => toggleStatus(template.id)}
+                      onClick={() => handleToggleStatus(template.id)}
                       className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 ${
                         template.status === 'published'
                           ? 'bg-green-100 text-green-800 hover:bg-green-200'
@@ -435,7 +458,7 @@ const TemplateManagement = () => {
                   <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-1">
                       <button
-                        onClick={() => toggleFeatured(template.id)}
+                        onClick={() => handleToggleFeatured(template.id)}
                         className={`p-1 rounded ${
                           template.featured 
                             ? 'text-yellow-600 hover:text-yellow-700' 
@@ -505,7 +528,7 @@ const TemplateManagement = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <img
-                    src={template.image}
+                    src={template.image_url || template.image}
                     alt={template.title}
                     className="h-12 w-12 rounded-lg object-cover"
                   />
@@ -525,7 +548,7 @@ const TemplateManagement = () => {
                 </div>
                 <div className="flex items-center space-x-1 ml-2">
                   <button
-                    onClick={() => toggleFeatured(template.id)}
+                    onClick={() => handleToggleFeatured(template.id)}
                     className={`p-1 rounded ${
                       template.featured 
                         ? 'text-yellow-600 hover:text-yellow-700' 
@@ -576,7 +599,7 @@ const TemplateManagement = () => {
                 <div>
                   <span className="text-gray-500">Status:</span>
                   <button
-                    onClick={() => toggleStatus(template.id)}
+                    onClick={() => handleToggleStatus(template.id)}
                     className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 ${
                       template.status === 'published'
                         ? 'bg-green-100 text-green-800 hover:bg-green-200'
@@ -607,7 +630,7 @@ const TemplateManagement = () => {
                   </div>
                   <span className="ml-1 text-xs text-gray-600">({template.rating})</span>
                 </div>
-                <span className="text-xs text-gray-500">Updated: {template.updatedAt}</span>
+                <span className="text-xs text-gray-500">Updated: {template.updated_at || template.updatedAt}</span>
               </div>
             </motion.div>
           ))}
