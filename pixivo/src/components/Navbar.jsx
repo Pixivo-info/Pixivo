@@ -14,7 +14,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Templates', path: '/templates' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/#contact' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   // Sample template data for breadcrumb - in real app, this would come from context or props
@@ -150,7 +150,7 @@ const Navbar = () => {
                 <div className="absolute inset-0 rounded-lg "></div>
               </motion.div>
               <span className="text-2xl font-bold font-syne text-blue-400">
-                Pixivo
+                PixivoTheme
               </span>
             </Link>
           </motion.div>
@@ -280,41 +280,50 @@ const Navbar = () => {
             transition={{ duration: 0.4, delay: 0.2 }}
             className="py-3 border-t border-gray-700/30"
           >
-            <nav className="flex items-center space-x-2 text-sm">
-              {breadcrumbs.map((crumb, index) => (
-                <React.Fragment key={index}>
-                  {index > 0 && (
-                    <motion.span 
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.2, delay: index * 0.1 }}
-                      className="text-gray-500"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </motion.span>
-                  )}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    {crumb.isActive ? (
-                      <span className="text-blue-400 font-medium px-2 py-1 bg-blue-500/10 rounded-md">
-                        {crumb.name}
-                      </span>
-                    ) : (
-                      <Link
-                        to={crumb.path}
-                        className="text-gray-400 hover:text-blue-400 transition-colors duration-300 px-2 py-1 rounded-md hover:bg-blue-500/10"
+            <nav className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                {breadcrumbs.map((crumb, index) => (
+                  <React.Fragment key={index}>
+                    {index > 0 && (
+                      <motion.span 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.2, delay: index * 0.1 }}
+                        className="text-gray-500 flex-shrink-0"
                       >
-                        {crumb.name}
-                      </Link>
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </motion.span>
                     )}
-                  </motion.div>
-                </React.Fragment>
-              ))}
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                      className="flex-shrink-0"
+                    >
+                      {crumb.isActive ? (
+                        <span className="text-blue-400 font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 bg-blue-500/10 rounded-md whitespace-nowrap">
+                          <span className="hidden sm:inline">{crumb.name}</span>
+                          <span className="sm:hidden">
+                            {crumb.name.length > 15 ? `${crumb.name.substring(0, 15)}...` : crumb.name}
+                          </span>
+                        </span>
+                      ) : (
+                        <Link
+                          to={crumb.path}
+                          className="text-gray-400 hover:text-blue-400 transition-colors duration-300 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md hover:bg-blue-500/10 whitespace-nowrap"
+                        >
+                          <span className="hidden sm:inline">{crumb.name}</span>
+                          <span className="sm:hidden">
+                            {crumb.name.length > 10 ? `${crumb.name.substring(0, 10)}...` : crumb.name}
+                          </span>
+                        </Link>
+                      )}
+                    </motion.div>
+                  </React.Fragment>
+                ))}
+              </div>
             </nav>
           </motion.div>
         )}

@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 const About = () => {
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const teamMembers = [
     {
       name: "Sarah Johnson",
@@ -54,7 +59,7 @@ const About = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <section className="py-20 pt-30 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -63,7 +68,7 @@ const About = () => {
             className="text-center"
           >
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              About <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-yellow-400">Pixivo</span>
+              About <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-yellow-400">PixivoTheme</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               We're passionate about empowering businesses and creators with stunning, 
@@ -85,7 +90,7 @@ const About = () => {
             >
               <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
               <p className="text-lg text-gray-600 mb-6">
-                Founded in 2020, Pixivo started with a simple mission: to democratize great design. 
+                Founded in 2020, PixivoTheme started with a simple mission: to democratize great design. 
                 We noticed that many small businesses and entrepreneurs struggled with creating 
                 professional-looking websites, presentations, and marketing materials.
               </p>
@@ -199,7 +204,7 @@ const About = () => {
           >
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The talented individuals behind Pixivo who work tirelessly to bring you the best templates and experience.
+              The talented individuals behind PixivoTheme who work tirelessly to bring you the best templates and experience.
             </p>
           </motion.div>
 

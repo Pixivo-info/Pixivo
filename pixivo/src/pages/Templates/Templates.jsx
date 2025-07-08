@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
@@ -12,6 +12,11 @@ const Templates = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Extended template data - replace with real data from API
   const allTemplates = useMemo(() => [
     {
@@ -21,7 +26,7 @@ const Templates = () => {
       rating: 5,
       downloads: "2.3k",
       category: "dashboard",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+      image: "https://res.cloudinary.com/dmsg2vpgy/image/upload/v1751864340/card1_bzp9dt.webp",
       technologies: ["HTML", "CSS", "JS", "REACT"]
     },
     {
@@ -202,63 +207,147 @@ const Templates = () => {
       {/* Filters and Templates Grid */}
       <section ref={ref} className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Category Filters */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
-            <div className="flex flex-wrap gap-3 justify-center">
-              {categories.map((category) => (
-                <motion.button
-                  key={category.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
-                    selectedCategory === category.id
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-primary/10'
-                  }`}
-                >
-                  {category.name} <span className="ml-1 text-sm opacity-75">({category.count})</span>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-
           {/* Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="max-w-2xl mx-auto mb-8"
+            transition={{ duration: 0.6 }}
+            className="max-w-4xl mx-auto mb-6 md:mb-8"
           >
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search templates by name, category, or tags..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
-              />
-              <svg
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <div className="relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              {/* Desktop Layout */}
+              <div className="hidden md:flex items-center px-6 py-4">
+                <div className="flex-shrink-0 mr-4">
+                  <svg
+                    className="w-6 h-6 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search templates by name, category, or tags..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 text-lg bg-transparent border-0 outline-none focus:outline-none placeholder-gray-400 text-gray-700"
                 />
-              </svg>
-              <button className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-600 transition-colors duration-300">
-                Search
-              </button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="ml-4 bg-gradient-to-r from-primary to-primary-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Search
+                </motion.button>
+              </div>
+
+              {/* Mobile Layout */}
+              <div className="md:hidden p-4">
+                <div className="flex items-center mb-3">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search templates..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-1 text-base bg-transparent border-0 outline-none focus:outline-none placeholder-gray-400 text-gray-700"
+                  />
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-gradient-to-r from-primary to-primary-600 text-white py-3 rounded-xl font-semibold hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  Search Templates
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Category Filters */}
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mb-8 md:mb-12"
+          >
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Filter by Category</h3>
+              
+              {/* Mobile: Horizontal Scrollable */}
+              <div className="md:hidden">
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {categories.map((category) => (
+                    <motion.button
+                      key={category.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`flex-shrink-0 px-4 py-2 rounded-xl font-medium transition-all duration-300 shadow-sm text-sm ${
+                        selectedCategory === category.id
+                          ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-lg'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-md border border-gray-200'
+                      }`}
+                    >
+                      {category.name} 
+                      <span className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
+                        selectedCategory === category.id
+                          ? 'bg-white/20 text-white'
+                          : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {category.count}
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop: Flex Wrap */}
+              <div className="hidden md:flex flex-wrap gap-3">
+                {categories.map((category) => (
+                  <motion.button
+                    key={category.id}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-300 shadow-sm ${
+                      selectedCategory === category.id
+                        ? 'bg-gradient-to-r from-primary to-primary-600 text-white shadow-lg'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-md border border-gray-200'
+                    }`}
+                  >
+                    {category.name} 
+                    <span className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
+                      selectedCategory === category.id
+                        ? 'bg-white/20 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {category.count}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
             </div>
           </motion.div>
 
@@ -267,12 +356,12 @@ const Templates = () => {
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-8"
+            className="mb-6 md:mb-8 px-2 md:px-0"
           >
-            <p className="text-gray-600">
-              Showing <span className="font-semibold">{filteredTemplates.length}</span> templates
+            <p className="text-sm md:text-base text-gray-600">
+              Showing <span className="font-semibold text-primary">{filteredTemplates.length}</span> templates
               {searchTerm && (
-                <span> for "<span className="font-semibold text-primary">{searchTerm}</span>"</span>
+                <span className="block md:inline"> for "<span className="font-semibold text-primary">{searchTerm}</span>"</span>
               )}
             </p>
           </motion.div>
@@ -283,7 +372,7 @@ const Templates = () => {
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 px-2 md:px-0"
           >
             {filteredTemplates.map((template, index) => (
               <motion.div

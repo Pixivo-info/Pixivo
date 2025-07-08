@@ -1,8 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TemplateCard = ({ template, index }) => {
+  const navigate = useNavigate();
+
   const cardVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -13,6 +15,10 @@ const TemplateCard = ({ template, index }) => {
         delay: index * 0.1,
       },
     },
+  };
+
+  const handleCardClick = () => {
+    navigate(`/template/${template.id}`);
   };
 
   const renderStars = (rating) => {
@@ -34,7 +40,8 @@ const TemplateCard = ({ template, index }) => {
     <motion.div
       variants={cardVariants}
       whileHover={{ y: -8, scale: 1.02 }}
-      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100"
+      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100 cursor-pointer"
+      onClick={handleCardClick}
     >
       {/* Template Image */}
       <div className="relative overflow-hidden h-48 ">
@@ -54,6 +61,7 @@ const TemplateCard = ({ template, index }) => {
           <Link
             to={`/template/${template.id}`}
             className="bg-white text-primary px-4 py-2 rounded-lg font-semibold shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300"
+            onClick={(e) => e.stopPropagation()}
           >
             Quick Preview
           </Link>
@@ -61,15 +69,15 @@ const TemplateCard = ({ template, index }) => {
       </div>
 
       {/* Card Content */}
-      <div className="p-5">
+      <div className="p-4 md:p-5">
         {/* Title */}
-        <h3 className="text-xl font-bold font-syne text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300">
+        <h3 className="text-lg md:text-xl font-bold font-syne text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2">
           {template.title}
         </h3>
 
         {/* Technology Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {template.technologies && template.technologies.map((tech, index) => (
+          {template.technologies && template.technologies.slice(0, 3).map((tech, index) => (
             <span 
               key={index}
               className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded"
@@ -77,6 +85,11 @@ const TemplateCard = ({ template, index }) => {
               {tech}
             </span>
           ))}
+          {template.technologies && template.technologies.length > 3 && (
+            <span className="px-2 py-1 text-xs font-medium bg-gray-200 text-gray-500 rounded">
+              +{template.technologies.length - 3}
+            </span>
+          )}
         </div>
 
         {/* Rating */}
@@ -104,8 +117,8 @@ const TemplateCard = ({ template, index }) => {
         </div>
 
         {/* Price and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-green-600">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="text-xl md:text-2xl font-bold text-green-600">
             {template.budget === 0 ? 'Free' : `$${template.budget}`}
           </div>
           <div className="flex gap-2">
@@ -114,6 +127,10 @@ const TemplateCard = ({ template, index }) => {
               whileTap={{ scale: 0.95 }}
               className="flex items-center justify-center w-10 h-10 border border-gray-300 text-gray-600 rounded-lg hover:border-primary hover:text-primary transition-all duration-300"
               title="Preview"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/template/${template.id}`);
+              }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -123,12 +140,18 @@ const TemplateCard = ({ template, index }) => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-primary text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 flex items-center"
+              className="bg-primary text-white py-2 px-4 md:px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 flex items-center text-sm md:text-base"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle download logic here
+                console.log('Download template:', template.id);
+              }}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Download
+              <span className="hidden sm:inline">Download</span>
+              <span className="sm:hidden">Get</span>
             </motion.button>
           </div>
         </div>

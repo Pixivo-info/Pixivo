@@ -6,15 +6,15 @@ const Footer = () => {
   const footerLinks = {
     company: [
       { name: 'About Us', href: '/about' },
-      { name: 'Our Team', href: '/team' },
+      { name: 'Services', href: '/services' },
      
-      { name: 'Contact', href: '/#contact' },
+      { name: 'Contact', href: '/contact' },
     ],
     services: [
       { name: 'UI/UX Design', href: '/services/design' },
       { name: 'Development', href: '/services/development' },
       { name: 'Templates', href: '/templates' },
-      { name: 'Custom Solutions', href: '/services/custom' },
+      { name: 'Custom Solutions', href: '/custom' },
     ],
     legal: [
       { name: 'Privacy Policy', href: '/privacy' },
@@ -59,7 +59,7 @@ const Footer = () => {
             >
               <Link to="/" className="flex items-center mb-4">
                 <span className="text-2xl font-bold font-syne text-primary">
-                  Pixivo
+                  PixivoTheme
                 </span>
               </Link>
               <p className="text-gray-300 mb-6 max-w-md">
@@ -148,14 +148,14 @@ const Footer = () => {
         >
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {new Date().getFullYear()} Pixivo. All rights reserved.
+              © {new Date().getFullYear()} PixivoTheme. All rights reserved.
             </div>
             <div className="flex space-x-6">
               {footerLinks.legal.map((link) => (
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="text-gray-400 hover:text-primary text-sm transition-colors duration-300"
+                  className="text-gray-400 hover:text-primary text-[10px] md:text-sm transition-colors duration-300"
                 >
                   {link.name}
                 </Link>

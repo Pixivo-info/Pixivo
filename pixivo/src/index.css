@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* Hide scrollbar for webkit browsers */
+.scrollbar-hide {
+  /* For webkit browsers */
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* Custom Swiper Styles for Templates Section */
 .templates-swiper {
   padding-bottom: 3rem !important;

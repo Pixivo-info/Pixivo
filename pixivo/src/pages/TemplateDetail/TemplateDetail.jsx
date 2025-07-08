@@ -1,15 +1,55 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import TemplateCard from '../../components/TemplateCard';
-import card1 from '../../assets/images/card1.webp';
+
 
 const TemplateDetail = () => {
   const { id } = useParams();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, threshold: 0.1 });
+  const [isFullScreenOpen, setIsFullScreenOpen] = useState(false);
+
+  // Scroll to top when page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        setIsFullScreenOpen(false);
+      }
+    };
+
+    if (isFullScreenOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset'; // Restore scrolling
+    };
+  }, [isFullScreenOpen]);
+
+  // Check if ID exists
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Template Not Found</h1>
+          <p className="text-gray-600 mb-8">The template you're looking for doesn't exist.</p>
+          <Link to="/templates" className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300">
+            Back to Templates
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Sample template data - in real app, fetch by ID
   const template = {
@@ -19,7 +59,7 @@ const TemplateDetail = () => {
     rating: 5,
     downloads: "2.3k",
     category: "dashboard",
-    image: card1,
+    image: "https://res.cloudinary.com/dmsg2vpgy/image/upload/v1751864340/card1_bzp9dt.webp",
     description: "A comprehensive dashboard template designed for modern web applications. This template features a clean, intuitive interface with advanced data visualization components, responsive design, and customizable layouts perfect for admin panels, analytics dashboards, and business intelligence applications.",
     fullDescription: "This premium dashboard template is crafted with attention to detail and modern design principles. Built with React and styled using Tailwind CSS, it offers a perfect foundation for creating professional admin interfaces and data visualization platforms. The template includes multiple layout options, dark/light theme support, and a comprehensive component library.",
     features: [
@@ -114,14 +154,12 @@ const TemplateDetail = () => {
                   whileHover={{ opacity: 1 }}
                   className="absolute inset-0 flex items-center justify-center"
                 >
-                  <a
-                    href={template.demoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => setIsFullScreenOpen(true)}
                     className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300"
                   >
                     Live Preview
-                  </a>
+                  </button>
                 </motion.div>
               </div>
             </motion.div>
@@ -185,16 +223,14 @@ const TemplateDetail = () => {
                     Download Now
                   </motion.button>
                   
-                  <motion.a
-                    href={template.demoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <motion.button
+                    onClick={() => setIsFullScreenOpen(true)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="block w-full text-center border-2 border-green-500 text-green-500 py-4 px-6 rounded-lg font-semibold hover:bg-green-500 hover:text-white transition-all duration-300"
+                    className="w-full border-2 border-green-500 text-green-500 py-4 px-6 rounded-lg font-semibold hover:bg-green-500 hover:text-white transition-all duration-300"
                   >
                     Live Preview
-                  </motion.a>
+                  </motion.button>
                 </div>
               </div>
 
@@ -307,6 +343,42 @@ const TemplateDetail = () => {
       </section>
 
       <Footer />
+
+      {/* Full Screen Image Modal */}
+      {isFullScreenOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          onClick={() => setIsFullScreenOpen(false)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setIsFullScreenOpen(false)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Full Screen Image */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="max-w-7xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={template.image}
+              alt={template.title}
+              className="w-auto h-[720px] object-contain rounded-lg shadow-2xl"
+            />
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };
