@@ -28,8 +28,16 @@ const TemplateDetail = () => {
         setLoading(true);
         setError(null);
         
+        // Validate ID first
+        const templateId = parseInt(id);
+        if (!templateId || isNaN(templateId)) {
+          setError('Invalid template ID');
+          setLoading(false);
+          return;
+        }
+        
         const [templateData, allTemplates] = await Promise.all([
-          getTemplateById(parseInt(id), false), // false for public access
+          getTemplateById(templateId, false), // false for public access
           getPublishedTemplates() // Get all published templates for related
         ]);
 
@@ -81,6 +89,7 @@ const TemplateDetail = () => {
           setError('Template not found');
         }
       } catch (err) {
+        console.error('Fetch error:', err);
         setError('Failed to load template');
       } finally {
         setLoading(false);
@@ -94,6 +103,19 @@ const TemplateDetail = () => {
       setLoading(false);
     }
   }, [id]);
+
+  // Add debug info in development only
+  const showDebug = import.meta.env.DEV;
+  
+  const debugInfo = {
+    id,
+    loading,
+    error,
+    templateExists: !!template,
+    templateId: template?.id,
+    templateTitle: template?.title,
+    templateStatus: template?.status
+  };
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -424,6 +446,16 @@ const TemplateDetail = () => {
             />
           </motion.div>
                   </motion.div>
+        )}
+        
+        {/* Debug Info (Development Only) */}
+        {showDebug && (
+          <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded-lg text-xs z-50 max-w-sm">
+            <h4 className="font-bold mb-2">🐛 Debug Info</h4>
+            <pre className="text-xs whitespace-pre-wrap">
+              {JSON.stringify(debugInfo, null, 2)}
+            </pre>
+          </div>
         )}
       </div>
   );

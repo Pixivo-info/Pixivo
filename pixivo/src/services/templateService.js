@@ -101,28 +101,31 @@ export const getAllTemplates = async (options = {}) => {
 export const getTemplateById = async (id, isAdmin = false) => {
   try {
     const client = isAdmin ? supabaseAdmin : supabase
+    
+    // Build query conditions
     let query = client
       .from(TABLES.TEMPLATES)
       .select('*')
-      .eq('id', id)
-
-    // Public access only gets published templates
-    if (!isAdmin) {
-      query = query.eq('status', 'published')
+    
+    if (isAdmin) {
+      // Admin can see any template by ID
+      query = query.eq('id', id)
+    } else {
+      // Public can only see published templates
+      query = query.eq('id', id).eq('status', 'published')
     }
 
-    const { data, error } = await query.single()
+    const { data, error } = await query.maybeSingle()
 
-    if (error && error.code === 'PGRST116') {
-      // No rows returned
+    if (error) {
+      console.error('Supabase error fetching template:', error)
       return null
     }
 
-    handleSupabaseError(error)
     return data
   } catch (error) {
     console.error('Error fetching template by ID:', error)
-    return null // Return null instead of throwing to handle gracefully
+    return null
   }
 }
 

@@ -17,12 +17,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
+    detectSessionInUrl: false, // Disable to avoid multiple clients
+    flowType: 'pkce',
+    storageKey: 'pixivo-auth-token' // Custom storage key
   },
-  realtime: {
-    params: {
-      eventsPerSecond: 10
+  global: {
+    headers: {
+      'x-application-name': 'pixivo-frontend'
     }
   }
 })
@@ -33,11 +34,12 @@ export const supabaseAdmin = supabaseServiceRoleKey
       auth: {
         autoRefreshToken: false,
         persistSession: false,
-        detectSessionInUrl: false
+        detectSessionInUrl: false,
+        storageKey: 'pixivo-admin-token' // Different storage key for admin
       },
-      realtime: {
-        params: {
-          eventsPerSecond: 10
+      global: {
+        headers: {
+          'x-application-name': 'pixivo-admin'
         }
       }
     })
