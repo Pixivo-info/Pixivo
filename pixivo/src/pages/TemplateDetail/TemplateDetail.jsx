@@ -6,7 +6,6 @@ import Footer from '../../components/Footer';
 import TemplateCard from '../../components/TemplateCard';
 import { getTemplateById, getPublishedTemplates } from '../../services/templateService';
 
-
 const TemplateDetail = () => {
   const { id } = useParams();
   const ref = useRef(null);
@@ -31,7 +30,7 @@ const TemplateDetail = () => {
         
         const [templateData, allTemplates] = await Promise.all([
           getTemplateById(parseInt(id), false), // false for public access
-          getPublishedTemplates({ limit: 4 }) // Get 4 for related
+          getPublishedTemplates() // Get all published templates for related
         ]);
 
         if (templateData) {
@@ -82,7 +81,6 @@ const TemplateDetail = () => {
           setError('Template not found');
         }
       } catch (err) {
-        console.error('Error fetching template:', err);
         setError('Failed to load template');
       } finally {
         setLoading(false);
@@ -91,6 +89,9 @@ const TemplateDetail = () => {
 
     if (id) {
       fetchTemplateData();
+    } else {
+      setError('No template ID provided');
+      setLoading(false);
     }
   }, [id]);
 
@@ -422,9 +423,9 @@ const TemplateDetail = () => {
               className="w-auto h-[720px] object-contain rounded-lg shadow-2xl"
             />
           </motion.div>
-        </motion.div>
-      )}
-    </div>
+                  </motion.div>
+        )}
+      </div>
   );
 };
 

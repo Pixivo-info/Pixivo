@@ -17,23 +17,9 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
-  // Sample template data for breadcrumb - in real app, this would come from context or props
   const getTemplateName = (templateId) => {
-    const templates = {
-      1: "Modern Dashboard Template",
-      2: "E-commerce UI Kit",
-      3: "Mobile App Design",
-      4: "Landing Page Template",
-      5: "Portfolio Website",
-      6: "Admin Panel UI",
-      7: "Blog Template",
-      8: "SaaS Landing Page",
-      9: "Restaurant Website",
-      10: "Social Media App",
-      11: "Finance Dashboard",
-      12: "Agency Portfolio"
-    };
-    return templates[templateId] || "Template";
+    // Template name will be fetched dynamically from database in production
+    return `Template ${templateId}`;
   };
 
   // Generate breadcrumbs based on current route

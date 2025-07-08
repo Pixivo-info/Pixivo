@@ -30,7 +30,7 @@ const TemplateEditor = () => {
     technologies: [],
     features: [''],
     featured: false,
-    status: 'draft',
+    status: 'published',
     demoUrl: '',
     downloadUrl: '',
     version: '1.0.0',

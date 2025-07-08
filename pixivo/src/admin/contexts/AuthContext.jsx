@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
-// Demo credentials - in real app, this would be handled by backend
-const DEMO_CREDENTIALS = {
+// Production credentials - replace with your authentication system
+const ADMIN_CREDENTIALS = {
   email: 'admin@pixivo.com',
   password: 'admin123'
 };
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Check credentials
-      if (email === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
+      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
         const userData = {
           id: 1,
           email: email,

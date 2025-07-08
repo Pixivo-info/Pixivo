@@ -105,14 +105,13 @@ export const getTemplateById = async (id, isAdmin = false) => {
       .from(TABLES.TEMPLATES)
       .select('*')
       .eq('id', id)
-      .single()
 
     // Public access only gets published templates
     if (!isAdmin) {
       query = query.eq('status', 'published')
     }
 
-    const { data, error } = await query
+    const { data, error } = await query.single()
 
     if (error && error.code === 'PGRST116') {
       // No rows returned
@@ -123,7 +122,7 @@ export const getTemplateById = async (id, isAdmin = false) => {
     return data
   } catch (error) {
     console.error('Error fetching template by ID:', error)
-    throw error
+    return null // Return null instead of throwing to handle gracefully
   }
 }
 

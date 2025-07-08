@@ -12,27 +12,45 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Create Supabase client for public operations (frontend)
+// Create single Supabase client instance to avoid multiple client warnings
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false
+    detectSessionInUrl: true,
+    flowType: 'pkce'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 })
 
-// Create Supabase client for admin operations (full access)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+// Create admin client only when service role key is available
+export const supabaseAdmin = supabaseServiceRoleKey 
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
+      }
+    })
+  : supabase // Fallback to regular client if no service role key
 
 // Helper function to handle Supabase errors
 export const handleSupabaseError = (error) => {
   if (error) {
-    console.error('Supabase Error:', error)
+    // Log detailed error for debugging (only in development)
+    if (import.meta.env.DEV) {
+      console.error('Supabase Error:', error)
+    }
+    // Throw user-friendly error
     throw new Error(error.message || 'An unexpected error occurred')
   }
 }

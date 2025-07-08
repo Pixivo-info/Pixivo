@@ -144,7 +144,7 @@ const TemplateCard = ({ template, index }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 // Handle download logic here
-                // TODO: Implement actual download functionality
+                window.open(template.downloadUrl || '#', '_blank');
               }}
             >
               <svg className="w-4 h-4 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
