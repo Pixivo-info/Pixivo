@@ -16,7 +16,6 @@ const TABLE_NAME = 'custom_solutions';
  */
 export const submitCustomSolutionRequest = async (requestData) => {
   try {
-    console.log('📤 Submitting custom solution request:', requestData);
     
     // Process and clean the data
     const processedData = {
@@ -31,7 +30,7 @@ export const submitCustomSolutionRequest = async (requestData) => {
       priority: 'medium'
     };
 
-    console.log('📋 Processed data for database:', processedData);
+    // Submit to database
 
     const { data, error } = await supabase
       .from(TABLE_NAME)
@@ -40,14 +39,11 @@ export const submitCustomSolutionRequest = async (requestData) => {
       .single();
 
     if (error) {
-      console.error('❌ Supabase error:', error);
       handleSupabaseError(error);
     }
 
-    console.log('✅ Custom solution request created:', data);
     return data;
   } catch (error) {
-    console.error('💥 Error submitting custom solution request:', error);
     throw error;
   }
 };
@@ -61,8 +57,6 @@ export const submitCustomSolutionRequest = async (requestData) => {
  */
 export const getAllCustomSolutions = async (options = {}) => {
   try {
-    console.log('📊 Fetching all custom solutions with options:', options);
-    
     let query = supabaseAdmin
       .from(TABLE_NAME)
       .select('*')
@@ -88,14 +82,11 @@ export const getAllCustomSolutions = async (options = {}) => {
     const { data, error } = await query;
 
     if (error) {
-      console.error('❌ Supabase error fetching custom solutions:', error);
       handleSupabaseError(error);
     }
 
-    console.log('✅ Custom solutions fetched:', data?.length || 0, 'found');
     return data || [];
   } catch (error) {
-    console.error('💥 Error fetching all custom solutions:', error);
     throw error;
   }
 };

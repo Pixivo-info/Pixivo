@@ -5,6 +5,8 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
 
+// Environment variables loaded successfully
+
 // Check if environment variables are configured
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(

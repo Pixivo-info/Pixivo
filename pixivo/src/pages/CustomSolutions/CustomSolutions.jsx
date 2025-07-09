@@ -147,7 +147,6 @@ const CustomSolutions = () => {
         setErrors({ submit: "Failed to submit request. Please try again." });
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       setErrors({ submit: "An error occurred. Please try again." });
     } finally {
       setIsSubmitting(false);
