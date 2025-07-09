@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import CustomDropdown from "../../components/CustomDropdown";
-import { addCustomSolutionRequest, validateCustomSolutionRequest } from "../../admin/utils/customSolutionsData";
+import { submitCustomSolutionRequest, validateCustomSolutionRequest } from "../../services/customSolutionsService";
 
 const CustomSolutions = () => {
   // Scroll to top when page loads
@@ -122,8 +122,8 @@ const CustomSolutions = () => {
     }
 
     try {
-      // Save the request to localStorage
-      const savedRequest = addCustomSolutionRequest(formData);
+      // Submit the request to Supabase database
+      const savedRequest = await submitCustomSolutionRequest(formData);
       
       if (savedRequest) {
         setSuccessMessage("Thank you! Your request has been submitted successfully. We will get back to you soon.");

@@ -60,7 +60,7 @@ export const handleSupabaseError = (error) => {
 // Database table names
 export const TABLES = {
   TEMPLATES: 'templates',
-  CUSTOM_SOLUTIONS: 'custom_solutions' // We'll create this later
+  CUSTOM_SOLUTIONS: 'custom_solutions' // Custom solutions table
 }
 
 export default supabase 

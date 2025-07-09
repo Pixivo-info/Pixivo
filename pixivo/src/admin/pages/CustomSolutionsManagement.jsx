@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  getStoredCustomSolutions, 
-  updateCustomSolutionRequest, 
-  deleteCustomSolutionRequest,
+  getAllCustomSolutions,
+  updateCustomSolution,
+  deleteCustomSolution,
   getCustomSolutionsStats,
+  updateCustomSolutionStatus,
+  updateCustomSolutionPriority,
+  updateCustomSolutionNotes
+} from '../../services/customSolutionsService';
+import { 
   STATUS_OPTIONS,
   PRIORITY_OPTIONS,
   SERVICE_TYPES,
@@ -40,11 +45,17 @@ const CustomSolutionsManagement = () => {
     applyFilters();
   }, [requests, activeTab, searchTerm, filterStatus, filterService, sortBy, sortOrder]);
 
-  const loadData = () => {
-    const requestsData = getStoredCustomSolutions();
-    const statsData = getCustomSolutionsStats();
-    setRequests(requestsData);
-    setStats(statsData);
+  const loadData = async () => {
+    try {
+      const [requestsData, statsData] = await Promise.all([
+        getAllCustomSolutions(),
+        getCustomSolutionsStats()
+      ]);
+      setRequests(requestsData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error loading custom solutions data:', error);
+    }
   };
 
   const applyFilters = () => {
@@ -113,23 +124,29 @@ const CustomSolutionsManagement = () => {
   };
 
   const handleStatusUpdate = async (requestId, newStatus) => {
-    const success = updateCustomSolutionRequest(requestId, { status: newStatus });
-    if (success) {
+    try {
+      await updateCustomSolutionStatus(requestId, newStatus);
       loadData();
+    } catch (error) {
+      console.error('Error updating status:', error);
     }
   };
 
   const handlePriorityUpdate = async (requestId, newPriority) => {
-    const success = updateCustomSolutionRequest(requestId, { priority: newPriority });
-    if (success) {
+    try {
+      await updateCustomSolutionPriority(requestId, newPriority);
       loadData();
+    } catch (error) {
+      console.error('Error updating priority:', error);
     }
   };
 
   const handleNotesUpdate = async (requestId, notes) => {
-    const success = updateCustomSolutionRequest(requestId, { notes });
-    if (success) {
+    try {
+      await updateCustomSolutionNotes(requestId, notes);
       loadData();
+    } catch (error) {
+      console.error('Error updating notes:', error);
     }
   };
 
@@ -143,12 +160,14 @@ const CustomSolutionsManagement = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (requestToDelete) {
-      const success = deleteCustomSolutionRequest(requestToDelete.id);
-      if (success) {
+      try {
+        await deleteCustomSolution(requestToDelete.id);
         loadData();
         setSelectedRequests(prev => prev.filter(id => id !== requestToDelete.id));
+      } catch (error) {
+        console.error('Error deleting request:', error);
       }
     }
     setShowDeleteModal(false);
@@ -482,14 +501,14 @@ const CustomSolutionsManagement = () => {
                         <div className="text-sm text-gray-900">
                           {SERVICE_TYPES[request.service] || request.service}
                         </div>
-                        {request.designType && (
+                        {request.design_type && (
                           <div className="text-xs text-gray-500">
-                            {DESIGN_TYPES[request.designType]}
+                            {DESIGN_TYPES[request.design_type]}
                           </div>
                         )}
-                        {request.websiteType && (
+                        {request.website_type && (
                           <div className="text-xs text-gray-500">
-                            {WEBSITE_TYPES[request.websiteType]}
+                            {WEBSITE_TYPES[request.website_type]}
                           </div>
                         )}
                         {request.technologies && request.technologies.length > 0 && (
@@ -543,8 +562,8 @@ const CustomSolutionsManagement = () => {
                         </select>
                       </td>
                       <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="hidden xl:block">{formatDate(request.createdAt)}</div>
-                        <div className="xl:hidden">{new Date(request.createdAt).toLocaleDateString()}</div>
+                        <div className="hidden xl:block">{formatDate(request.created_at)}</div>
+                        <div className="xl:hidden">{new Date(request.created_at).toLocaleDateString()}</div>
                       </td>
                       <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-1">
@@ -619,11 +638,11 @@ const CustomSolutionsManagement = () => {
                        <span className="font-medium text-gray-700">Service:</span>
                        <div className="text-gray-600 text-xs mt-1">
                          {SERVICE_TYPES[request.service] || request.service}
-                         {request.designType && (
-                           <div className="text-gray-500">{DESIGN_TYPES[request.designType]}</div>
+                         {request.design_type && (
+                           <div className="text-gray-500">{DESIGN_TYPES[request.design_type]}</div>
                          )}
-                         {request.websiteType && (
-                           <div className="text-gray-500">{WEBSITE_TYPES[request.websiteType]}</div>
+                         {request.website_type && (
+                           <div className="text-gray-500">{WEBSITE_TYPES[request.website_type]}</div>
                          )}
                          {request.technologies && request.technologies.length > 0 && (
                            <div className="flex flex-wrap gap-1 mt-1">
@@ -671,7 +690,7 @@ const CustomSolutionsManagement = () => {
                   {/* Card Footer */}
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
                     <div className="flex items-center space-x-3">
-                      <span className="text-xs text-gray-500">{formatDate(request.createdAt)}</span>
+                      <span className="text-xs text-gray-500">{formatDate(request.created_at)}</span>
                       <select
                         value={request.status}
                         onChange={(e) => handleStatusUpdate(request.id, e.target.value)}
@@ -793,17 +812,17 @@ const CustomSolutionsManagement = () => {
                     <p className="mt-1 text-sm text-gray-900">{SERVICE_TYPES[selectedRequest.service] || selectedRequest.service}</p>
                   </div>
                   
-                  {selectedRequest.designType && (
+                  {selectedRequest.design_type && (
                     <div>
                       <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Design Type</label>
-                      <p className="mt-1 text-sm text-gray-900">{DESIGN_TYPES[selectedRequest.designType]}</p>
+                      <p className="mt-1 text-sm text-gray-900">{DESIGN_TYPES[selectedRequest.design_type]}</p>
                     </div>
                   )}
                   
-                  {selectedRequest.websiteType && (
+                  {selectedRequest.website_type && (
                     <div>
                       <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Website Type</label>
-                      <p className="mt-1 text-sm text-gray-900">{WEBSITE_TYPES[selectedRequest.websiteType]}</p>
+                      <p className="mt-1 text-sm text-gray-900">{WEBSITE_TYPES[selectedRequest.website_type]}</p>
                     </div>
                   )}
 
@@ -836,11 +855,11 @@ const CustomSolutionsManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Submitted</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedRequest.createdAt)}</p>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedRequest.created_at)}</p>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">Last Updated</label>
-                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedRequest.updatedAt)}</p>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedRequest.updated_at)}</p>
                   </div>
                 </div>
               </div>
