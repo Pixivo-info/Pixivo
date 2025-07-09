@@ -1,6 +1,6 @@
 -- ===============================================
--- PIXIVO ADMIN AUTHENTICATION SETUP
--- Complete SQL setup for Supabase database
+-- PIXIVO ADMIN AUTHENTICATION - PRODUCTION SETUP
+-- Ready to deploy with custom credentials
 -- ===============================================
 
 -- Enable necessary extensions
@@ -81,7 +81,7 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', 'Admin User')
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'Pixivo Admin')
   );
   RETURN NEW;
 END;
@@ -93,34 +93,24 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_admin();
 
--- Function to update last login time
-CREATE OR REPLACE FUNCTION public.update_admin_last_login()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE public.admin_profiles 
-  SET last_login_at = TIMEZONE('utc'::text, NOW())
-  WHERE id = NEW.user_id;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- ===============================================
--- 5. CREATE DEFAULT ADMIN USER
+-- 5. CREATE PRODUCTION ADMIN USER
 -- ===============================================
 
--- Insert default admin user
--- ⚠️  IMPORTANT: Change email and password before running in production!
-
--- First, check if admin user already exists
+-- Create admin user with your credentials
 DO $$
 DECLARE
     admin_exists boolean := false;
+    new_user_id uuid;
 BEGIN
     -- Check if admin user already exists
     SELECT EXISTS(SELECT 1 FROM auth.users WHERE email = 'admin@pixivotheme.com') INTO admin_exists;
     
     -- If admin doesn't exist, create it
     IF NOT admin_exists THEN
+        -- Generate new UUID for user
+        SELECT gen_random_uuid() INTO new_user_id;
+        
         INSERT INTO auth.users (
             instance_id,
             id,
@@ -144,11 +134,11 @@ BEGIN
             recovery_token
         ) VALUES (
             '00000000-0000-0000-0000-000000000000',
-            gen_random_uuid(),
+            new_user_id,
             'authenticated',
             'authenticated',
-            'admin@pixivotheme.com',                    -- ✅ Updated email
-            crypt('pixivo.theme@admin-2003', gen_salt('bf')),  -- ✅ Updated password
+            'admin@pixivotheme.com',
+            crypt('pixivo.theme@admin-2003', gen_salt('bf')),
             NOW(),
             NULL,
             NOW(),
@@ -157,7 +147,7 @@ BEGIN
             NOW(),
             NOW(),
             '{"provider": "email", "providers": ["email"]}',
-            '{"full_name": "Pixivo Admin"}',       -- 🔄 Change this name
+            '{"full_name": "Pixivo Theme Admin"}',
             FALSE,
             '',
             '',
@@ -165,7 +155,9 @@ BEGIN
             ''
         );
         
-        RAISE NOTICE 'Admin user created successfully!';
+        RAISE NOTICE 'Production admin user created successfully!';
+        RAISE NOTICE 'Email: admin@pixivotheme.com';
+        RAISE NOTICE 'Password: pixivo.theme@admin-2003';
     ELSE
         RAISE NOTICE 'Admin user already exists, skipping creation.';
     END IF;
@@ -188,23 +180,24 @@ GRANT ALL ON public.admin_profiles TO authenticated;
 -- ===============================================
 
 -- Verify setup (run these after the above setup)
--- SELECT 'Admin users count: ' || COUNT(*) FROM auth.users;
--- SELECT 'Admin profiles count: ' || COUNT(*) FROM public.admin_profiles;
--- SELECT email, role, is_active, created_at FROM public.admin_profiles;
+SELECT 'Admin users count: ' || COUNT(*) FROM auth.users WHERE email = 'admin@pixivotheme.com';
+SELECT 'Admin profiles count: ' || COUNT(*) FROM public.admin_profiles WHERE email = 'admin@pixivotheme.com';
 
 -- ===============================================
--- SETUP COMPLETE! 
+-- PRODUCTION SETUP COMPLETE! 
 -- ===============================================
+
+-- ✅ CREDENTIALS:
+-- Email: admin@pixivotheme.com
+-- Password: pixivo.theme@admin-2003
 
 -- 📝 NEXT STEPS:
--- 1. Update the default admin email and password above
--- 2. Run this entire script in your Supabase SQL editor
--- 3. Copy your Supabase URL and keys to .env file
--- 4. Test login with your admin credentials
--- 5. Create additional admin users as needed
+-- 1. This script is ready for production use
+-- 2. Make sure your .env file has correct Supabase credentials
+-- 3. Test login at: https://your-domain.com/admin/login
+-- 4. Enable 2FA on your Supabase dashboard for extra security
 
--- 🔒 SECURITY NOTES:
--- - Always use strong passwords for admin accounts
--- - Enable 2FA on your Supabase dashboard
--- - Regularly rotate service role keys
--- - Monitor admin access logs 
+-- 🔒 SECURITY REMINDER:
+-- - Change password after first login if needed
+-- - Enable 2FA on Supabase dashboard
+-- - Monitor admin access logs regularly 
