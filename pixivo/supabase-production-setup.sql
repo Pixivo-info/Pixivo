@@ -34,6 +34,11 @@ CREATE INDEX IF NOT EXISTS idx_admin_profiles_active ON public.admin_profiles(is
 -- Enable RLS on admin_profiles table
 ALTER TABLE public.admin_profiles ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Admin can view own profile" ON public.admin_profiles;
+DROP POLICY IF EXISTS "Admin can update own profile" ON public.admin_profiles;
+DROP POLICY IF EXISTS "Super admin can view all profiles" ON public.admin_profiles;
+
 -- Create RLS policies
 CREATE POLICY "Admin can view own profile" ON public.admin_profiles
   FOR SELECT USING (auth.uid() = id);
@@ -63,6 +68,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Drop existing trigger if exists
+DROP TRIGGER IF EXISTS handle_admin_profiles_updated_at ON public.admin_profiles;
+
 -- Create trigger for admin_profiles
 CREATE TRIGGER handle_admin_profiles_updated_at
   BEFORE UPDATE ON public.admin_profiles
@@ -86,6 +94,9 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Drop existing trigger if exists
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
 -- Create trigger for new user creation
 CREATE TRIGGER on_auth_user_created
