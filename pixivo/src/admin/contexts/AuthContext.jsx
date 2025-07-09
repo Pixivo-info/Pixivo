@@ -1,12 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
 
 const AuthContext = createContext();
-
-// Production credentials - replace with your authentication system
-const ADMIN_CREDENTIALS = {
-  email: 'admin@pixivo.com',
-  password: 'admin123'
-};
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,71 +10,95 @@ export const AuthProvider = ({ children }) => {
 
   // Check for existing session on app load
   useEffect(() => {
-    const checkAuthStatus = () => {
-      const authData = localStorage.getItem('pixivo_admin_auth');
-      if (authData) {
-        try {
-          const parsedData = JSON.parse(authData);
-          if (parsedData.isAuthenticated && parsedData.user) {
-            setIsAuthenticated(true);
-            setUser(parsedData.user);
-          }
-        } catch (error) {
-          console.error('Error parsing auth data:', error);
-          localStorage.removeItem('pixivo_admin_auth');
+    const checkAuthStatus = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+        } else if (session?.user) {
+          setIsAuthenticated(true);
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name || 'Admin User',
+            role: 'administrator'
+          });
         }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuthStatus();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          setIsAuthenticated(true);
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.user_metadata?.full_name || 'Admin User',
+            role: 'administrator'
+          });
+        } else if (event === 'SIGNED_OUT') {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email, password) => {
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
-      // Check credentials
-      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        const userData = {
-          id: 1,
-          email: email,
-          name: 'Admin User',
-          role: 'administrator',
-          avatar: null
-        };
-
-        const authData = {
-          isAuthenticated: true,
-          user: userData
-        };
-
-        // Store in localStorage
-        localStorage.setItem('pixivo_admin_auth', JSON.stringify(authData));
-        
-        setIsAuthenticated(true);
-        setUser(userData);
-        
-        return { success: true };
-      } else {
+      if (error) {
         return { 
           success: false, 
-          error: 'Invalid email or password' 
+          error: error.message === 'Invalid login credentials' 
+            ? 'Invalid email or password' 
+            : error.message 
         };
       }
-    } catch (error) {
+
+      if (data?.user) {
+        // Authentication successful, state will be updated by onAuthStateChange
+        return { success: true };
+      }
+
       return { 
         success: false, 
         error: 'Login failed. Please try again.' 
       };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: 'An unexpected error occurred. Please try again.' 
+      };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('pixivo_admin_auth');
-    setIsAuthenticated(false);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      // State will be updated by onAuthStateChange listener
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout on error
+      setIsAuthenticated(false);
+      setUser(null);
+    }
   };
 
   const value = {
