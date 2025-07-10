@@ -106,7 +106,8 @@ const ContactSection = () => {
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Email Us</h4>
-                    <p className="text-gray-600">hello@pixivo.com</p>
+                    <p className="text-gray-600">pixivoinfo@gmail.com
+</p>
                   </div>
                 </motion.div>
 

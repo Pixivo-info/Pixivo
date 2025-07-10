@@ -132,9 +132,10 @@ const License = () => {
               <p className="text-gray-600">
                 If you have questions about licensing, please contact us at:
                 <br />
-                <strong>Email:</strong> license@pixivo.com
-                <br />
-                <strong>Support:</strong> support@pixivo.com
+                
+             
+                <strong>Support:</strong> pixivoinfo@gmail.com
+
               </p>
             </div>
           </motion.div>

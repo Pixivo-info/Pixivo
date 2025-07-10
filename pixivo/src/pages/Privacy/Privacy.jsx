@@ -103,9 +103,10 @@ const Privacy = () => {
               <p className="text-gray-600">
                 If you have any questions about this privacy policy, please contact us at:
                 <br />
-                <strong>Email:</strong> privacy@pixivo.com
+                <strong>Email:</strong> pixivoinfo@gmail.com
+
                 <br />
-                <strong>Address:</strong> 123 Digital Street, Tech City, TC 12345
+        
               </p>
             </div>
           </motion.div>

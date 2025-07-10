@@ -136,9 +136,10 @@ const Refund = () => {
                   For questions about our refund policy or to report exceptional circumstances:
                 </p>
                 <p className="text-gray-600">
-                  <strong>Email:</strong> support@pixivo.com
+                  <strong>Email:</strong> pixivoinfo@gmail.com
+
                   <br />
-                  <strong>Subject Line:</strong> "Refund Inquiry - Order #[Your Order Number]"
+                  <strong>Subject Line:</strong> "Refund Inquiry - Order #[Your Order Name]"
                   <br />
                   <strong>Response Time:</strong> 24-48 hours
                   <br />

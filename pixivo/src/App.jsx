@@ -10,6 +10,8 @@ import Privacy from './pages/Privacy/Privacy';
 import Terms from './pages/Terms/Terms';
 import License from './pages/License/License';
 import Refund from './pages/Refund/Refund';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 // Download step pages
 import DownloadStep1 from './pages/DownloadStep1';
@@ -60,7 +62,11 @@ function App() {
           <Route path="templates/edit/:id" element={<TemplateEditor />} />
           <Route path="custom-solutions" element={<CustomSolutionsManagement />} />
         </Route>
+
+        {/* Analytics */}
       </Routes>
+      <Analytics />
+      <SpeedInsights />
     </AuthProvider>
   );
 }

@@ -114,9 +114,10 @@ const Terms = () => {
               <p className="text-gray-600">
                 If you have any questions about these Terms of Service, please contact us at:
                 <br />
-                <strong>Email:</strong> legal@pixivo.com
+                <strong>Email:</strong>pixivoinfo@gmail.com
+
                 <br />
-                <strong>Address:</strong> 123 Digital Street, Tech City, TC 12345
+               
               </p>
             </div>
           </motion.div>
