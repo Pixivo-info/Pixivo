@@ -42,6 +42,38 @@ const Navbar = () => {
             });
           }
           break;
+        case 'download-step-1':
+          breadcrumbs.push({ name: 'Templates', path: '/templates' });
+          if (pathSegments[1]) {
+            breadcrumbs.push({ 
+              name: getTemplateName(parseInt(pathSegments[1])), 
+              path: `/template/${pathSegments[1]}`
+            });
+            breadcrumbs.push({ 
+              name: 'Download Instructions', 
+              path: `/download-step-1/${pathSegments[1]}`,
+              isActive: true 
+            });
+          }
+          break;
+        case 'download-step-2':
+          breadcrumbs.push({ name: 'Templates', path: '/templates' });
+          if (pathSegments[1]) {
+            breadcrumbs.push({ 
+              name: getTemplateName(parseInt(pathSegments[1])), 
+              path: `/template/${pathSegments[1]}`
+            });
+            breadcrumbs.push({ 
+              name: 'Download Instructions', 
+              path: `/download-step-1/${pathSegments[1]}`
+            });
+            breadcrumbs.push({ 
+              name: 'Download', 
+              path: `/download-step-2/${pathSegments[1]}`,
+              isActive: true 
+            });
+          }
+          break;
         case 'about':
           breadcrumbs.push({ name: 'About', path: '/about' });
           break;
@@ -54,7 +86,10 @@ const Navbar = () => {
   };
 
   const breadcrumbs = generateBreadcrumbs();
-  const showBreadcrumb = location.pathname.includes('/template/') || location.pathname === '/templates';
+  const showBreadcrumb = location.pathname.includes('/template/') || 
+                        location.pathname === '/templates' || 
+                        location.pathname.includes('/download-step-1/') || 
+                        location.pathname.includes('/download-step-2/');
 
   useEffect(() => {
     const handleScroll = () => {

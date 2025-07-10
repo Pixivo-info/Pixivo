@@ -11,6 +11,10 @@ import Terms from './pages/Terms/Terms';
 import License from './pages/License/License';
 import Refund from './pages/Refund/Refund';
 
+// Download step pages
+import DownloadStep1 from './pages/DownloadStep1';
+import DownloadStep2 from './pages/DownloadStep2';
+
 // Admin imports
 import AdminLayout from './admin/components/AdminLayout';
 import AdminDashboard from './admin/pages/AdminDashboard';
@@ -30,6 +34,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/templates" element={<Templates />} />
         <Route path="/template/:id" element={<TemplateDetail />} />
+        <Route path="/download-step-1/:id" element={<DownloadStep1 />} />
+        <Route path="/download-step-2/:id" element={<DownloadStep2 />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/services" element={<Services />} />

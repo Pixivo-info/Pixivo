@@ -152,13 +152,8 @@ const TemplateCard = ({ template, index }) => {
               className="bg-primary text-white py-2 px-4 md:px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 flex items-center text-sm md:text-base"
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle download logic here
-                if (template.downloadUrl && template.downloadUrl !== '#') {
-                  window.open(template.downloadUrl, '_blank');
-                } else {
-                  // Fallback to demo or contact
-                  alert('Download will be available after purchase. Contact us for more details.');
-                }
+                // Navigate to download step 1
+                navigate(`/download-step-1/${template.id}`);
               }}
             >
               <svg className="w-4 h-4 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

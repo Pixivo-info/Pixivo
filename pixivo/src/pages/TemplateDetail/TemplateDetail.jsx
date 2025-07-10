@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import TemplateCard from '../../components/TemplateCard';
@@ -7,6 +7,7 @@ import { getTemplateById, getPublishedTemplates } from '../../services/templateS
 
 const TemplateDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [template, setTemplate] = useState(null);
   const [relatedTemplates, setRelatedTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -229,7 +230,7 @@ const TemplateDetail = () => {
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button 
-                    onClick={() => window.open(template.downloadUrl, '_blank')}
+                    onClick={() => navigate(`/download-step-1/${id}`)}
                     className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
