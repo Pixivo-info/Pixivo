@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   const footerLinks = {
     company: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Services', href: '/services' },
+      { name: 'About Us', href: '/' },
+      { name: 'Services', href: '/' },
      
       { name: 'Contact', href: '/contact' },
     ],
