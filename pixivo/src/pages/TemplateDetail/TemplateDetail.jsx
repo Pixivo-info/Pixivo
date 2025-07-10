@@ -1,5 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -8,9 +7,6 @@ import { getTemplateById, getPublishedTemplates } from '../../services/templateS
 
 const TemplateDetail = () => {
   const { id } = useParams();
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, threshold: 0.1 });
-  const [isFullScreenOpen, setIsFullScreenOpen] = useState(false);
   const [template, setTemplate] = useState(null);
   const [relatedTemplates, setRelatedTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,55 +17,56 @@ const TemplateDetail = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Fetch template data from Supabase
+  // Fetch template data
   useEffect(() => {
     const fetchTemplateData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Validate ID first
         const templateId = parseInt(id);
         if (!templateId || isNaN(templateId)) {
           setError('Invalid template ID');
-          setLoading(false);
           return;
         }
         
         const [templateData, allTemplates] = await Promise.all([
-          getTemplateById(templateId, false), // false for public access
-          getPublishedTemplates() // Get all published templates for related
+          getTemplateById(templateId, false),
+          getPublishedTemplates()
         ]);
 
         if (templateData) {
-          // Transform database fields to component format
           const transformedTemplate = {
             id: templateData.id,
-            title: templateData.title,
-            budget: templateData.budget,
-            rating: templateData.rating,
-            downloads: templateData.downloads,
-            category: templateData.category,
-            image: templateData.image_url,
-            description: templateData.description,
-            fullDescription: templateData.full_description || templateData.description,
-            features: templateData.features || [],
-            technologies: templateData.technologies || [],
-            demoUrl: templateData.demo_url || '#',
-            downloadUrl: templateData.download_url || '#',
-            lastUpdated: new Date(templateData.updated_at).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            }),
+            title: templateData.title || 'Untitled Template',
+            budget: templateData.budget || 0,
+            rating: templateData.rating || 5,
+            downloads: templateData.downloads || '0k',
+            category: templateData.category || 'uncategorized',
+            image: templateData.image_url || templateData.image || '/placeholder-image.svg',
+            description: templateData.description || 'No description available',
+            fullDescription: templateData.full_description || templateData.description || 'No detailed description available',
+            features: Array.isArray(templateData.features) ? templateData.features : 
+                     (templateData.features ? [templateData.features] : ['Standard features included']),
+            technologies: Array.isArray(templateData.technologies) ? templateData.technologies : 
+                         (templateData.technologies ? [templateData.technologies] : ['Modern technologies']),
+            demoUrl: templateData.demo_url || templateData.demoUrl || '#',
+            downloadUrl: templateData.download_url || templateData.downloadUrl || '#',
+            lastUpdated: templateData.updated_at ? 
+              new Date(templateData.updated_at).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              }) : 'Recently updated',
             version: templateData.version || '1.0.0',
-            fileSize: templateData.file_size || 'N/A',
-            compatibleWith: templateData.compatible_with || []
+            fileSize: templateData.file_size || templateData.fileSize || 'Optimized size',
+            compatibleWith: Array.isArray(templateData.compatible_with) ? templateData.compatible_with :
+                           (templateData.compatible_with ? [templateData.compatible_with] : ['All modern browsers'])
           };
           
           setTemplate(transformedTemplate);
 
-          // Filter related templates (same category, different ID)
+          // Get related templates
           const related = allTemplates
             .filter(t => t.category === templateData.category && t.id !== templateData.id)
             .slice(0, 3)
@@ -80,7 +77,7 @@ const TemplateDetail = () => {
               rating: t.rating,
               downloads: t.downloads,
               category: t.category,
-              image: t.image_url,
+              image: t.image_url || t.image,
               technologies: t.technologies || []
             }));
           
@@ -89,7 +86,6 @@ const TemplateDetail = () => {
           setError('Template not found');
         }
       } catch (err) {
-        console.error('Fetch error:', err);
         setError('Failed to load template');
       } finally {
         setLoading(false);
@@ -98,94 +94,14 @@ const TemplateDetail = () => {
 
     if (id) {
       fetchTemplateData();
-    } else {
-      setError('No template ID provided');
-      setLoading(false);
     }
   }, [id]);
-
-  // Add debug info in development only
-  const showDebug = import.meta.env.DEV;
-  
-  const debugInfo = {
-    id,
-    loading,
-    error,
-    templateExists: !!template,
-    templateId: template?.id,
-    templateTitle: template?.title,
-    templateStatus: template?.status
-  };
-
-  // Handle ESC key to close modal
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        setIsFullScreenOpen(false);
-      }
-    };
-
-    if (isFullScreenOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset'; // Restore scrolling
-    };
-  }, [isFullScreenOpen]);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-96 pt-40">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-              <svg className="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Loading Template...</h3>
-            <p className="text-gray-600">Please wait while we fetch the template details.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state or template not found
-  if (error || !template || !id) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-96 pt-40">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Template Not Found</h1>
-            <p className="text-gray-600 mb-8">{error || "The template you're looking for doesn't exist."}</p>
-            <Link to="/templates" className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300">
-              Back to Templates
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <svg
         key={i}
-        className={`w-5 h-5 ${
-          i < rating ? 'text-yellow-400' : 'text-gray-300'
-        }`}
+        className={`w-5 h-5 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}`}
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -194,267 +110,316 @@ const TemplateDetail = () => {
     ));
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen pt-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Template...</h3>
+            <p className="text-gray-600">Please wait while we fetch the template details.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !template) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-screen pt-20">
+          <div className="text-center max-w-md mx-auto px-4">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Template Not Found</h1>
+            <p className="text-gray-600 mb-8">{error || "The template you're looking for doesn't exist."}</p>
+            <Link 
+              to="/templates" 
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Templates
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      {/* Template Detail Content */}
-      <section ref={ref} className="py-16 pt-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+      {/* Hero Section */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+          {/* Breadcrumb */}
+          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+            <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <Link to="/templates" className="hover:text-blue-600 transition-colors">Templates</Link>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            <span className="text-gray-900 font-medium">{template.title}</span>
+          </nav>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Template Preview */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="relative rounded-xl overflow-hidden shadow-2xl group">
+            <div className="lg:col-span-2">
+              <div className="relative rounded-2xl overflow-hidden shadow-xl bg-white">
                 <img
                   src={template.image}
                   alt={template.title}
-                  className="w-full h-auto group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-auto"
+                  onError={(e) => {
+                    e.target.src = '/placeholder-image.svg';
+                  }}
                 />
-              
                 
-                {/* Live Preview Button */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  className="absolute inset-0 flex items-center justify-center"
-                >
-                  <button
-                    onClick={() => setIsFullScreenOpen(true)}
-                    className="bg-primary text-white px-6 py-3 rounded-lg font-semibold shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300"
-                  >
-                    Live Preview
-                  </button>
-                </motion.div>
+                
               </div>
-            </motion.div>
+            </div>
 
-            {/* Template Info */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {/* Back Button */}
-              <div className="mb-6">
-                <Link
-                  to="/templates"
-                  className="inline-flex items-center text-gray-600 hover:text-primary transition-colors duration-300"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to Templates
-                </Link>
+            {/* Template Info Sidebar */}
+            <div className="space-y-6">
+              {/* Title & Description */}
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">{template.title}</h1>
+                <p className="text-gray-600 text-lg leading-relaxed">{template.description}</p>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold font-syne text-gray-900 mb-4">
-                {template.title}
-              </h1>
-
-              <p className="text-lg text-gray-600 mb-6">
-                {template.description}
-              </p>
-
-              {/* Rating and Stats */}
-              <div className="flex items-center space-x-6 mb-8">
+              {/* Rating & Downloads */}
+              <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-1">
                   {renderStars(template.rating)}
-                  <span className="ml-2 text-gray-600">({template.rating})</span>
+                  <span className="text-sm text-gray-600 ml-2">({template.rating})</span>
                 </div>
-                <div className="flex items-center text-gray-600">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <div className="flex items-center space-x-1 text-gray-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3" />
                   </svg>
-                  {template.downloads} downloads
+                  <span className="text-sm">{template.downloads} downloads</span>
                 </div>
               </div>
 
-              {/* Price and Actions */}
-              <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
-                <div className="flex items-center justify-between mb-6">
+              {/* Price */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+                <div className="flex items-center justify-between mb-4">
                   <div>
-                    <span className="text-3xl font-bold text-primary">${template.budget}</span>
-                    <span className="text-gray-600 ml-2">one-time purchase</span>
+                    <span className="text-3xl font-bold text-blue-600">${template.budget}</span>
+                    <span className="text-gray-600 ml-2">one-time</span>
+                  </div>
+                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                    Best Value
+                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <button 
+                    onClick={() => window.open(template.downloadUrl, '_blank')}
+                    className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Download Now</span>
+                  </button>
+                  
+                  <button 
+                    onClick={() => window.open(template.demoUrl, '_blank')}
+                    className="w-full border-2 border-blue-600 text-blue-600 py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center space-x-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>Live Preview</span>
+                  </button>
+                </div>
+
+                {/* Template Details */}
+                <div className="mt-6 pt-6 border-t border-blue-200">
+                  <h3 className="font-semibold text-gray-900 mb-3">Template Details</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Category:</span>
+                      <span className="font-medium capitalize">{template.category}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Version:</span>
+                      <span className="font-medium">{template.version}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">File Size:</span>
+                      <span className="font-medium">{template.fileSize}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Last Updated:</span>
+                      <span className="font-medium">{template.lastUpdated}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="space-y-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-primary text-white py-4 px-6 rounded-lg font-semibold hover:bg-primary-600 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Download Now
-                  </motion.button>
-                  
-                  <motion.button
-                    onClick={() => setIsFullScreenOpen(true)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full border-2 border-green-500 text-green-500 py-4 px-6 rounded-lg font-semibold hover:bg-green-500 hover:text-white transition-all duration-300"
-                  >
-                    Live Preview
-                  </motion.button>
-                </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              {/* Template Details */}
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Last Updated:</span>
-                  <span className="font-medium">{template.lastUpdated}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Version:</span>
-                  <span className="font-medium">{template.version}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">File Size:</span>
-                  <span className="font-medium">{template.fileSize}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Category:</span>
-                  <span className="font-medium capitalize">{template.category}</span>
-                </div>
-              </div>
-            </motion.div>
+      {/* Detailed Information - Simplified */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Description Section */}
+          <div className="bg-white rounded-lg p-8 shadow-sm mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">About This Template</h2>
+            <div className="prose prose-lg text-gray-600 leading-relaxed mb-8">
+              <p>{template.fullDescription}</p>
+            </div>
+            
+           
           </div>
 
-          {/* Detailed Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16"
-          >
-            {/* Full Description */}
-            <div className="lg:col-span-2">
-              <h2 className="text-2xl font-bold font-syne text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-600 leading-relaxed mb-6">
-                {template.fullDescription}
-              </p>
+          {/* Features Section */}
+          <div className="bg-white rounded-lg p-8 shadow-sm mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Template Features</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {template.features.map((feature, index) => (
+                <div key={index} className="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+                  <svg className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700 font-medium">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-              <h3 className="text-xl font-bold font-syne text-gray-900 mb-4">Technologies Used</h3>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {template.technologies.map((tech, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
+          {/* Technologies Section */}
+          <div className="bg-white rounded-lg p-8 shadow-sm mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Technologies Used</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+              {template.technologies.map((tech, index) => (
+                <div key={index} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-900">{tech}</span>
+                </div>
+              ))}
+            </div>
 
-              <h3 className="text-xl font-bold font-syne text-gray-900 mb-4">Compatible With</h3>
-              <ul className="space-y-2">
+            {/* Compatible With Section (Boxed) */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Compatible With</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {template.compatibleWith.map((item, index) => (
-                  <li key={index} className="flex items-center text-gray-600">
-                    <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div key={index} className="flex items-center text-gray-600">
+                    <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     {item}
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
+          </div>
 
-            {/* Features List */}
-            <div>
-              <h2 className="text-2xl font-bold font-syne text-gray-900 mb-4">Features</h2>
-              <ul className="space-y-3">
-                {template.features.map((feature, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                    transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
-                    className="flex items-center text-gray-600"
-                  >
-                    <svg className="w-4 h-4 text-primary mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {feature}
-                  </motion.li>
-                ))}
-              </ul>
+          {/* About Developer - Moved to Last */}
+          <div className="bg-white rounded-lg p-8 shadow-sm">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">About Developer</h2>
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">PT</span>
+              </div>
+              <div>
+                <div className="text-xl font-semibold text-gray-900">PixivoTheme</div>
+                <div className="text-gray-600">Professional Developer</div>
+              </div>
             </div>
-          </motion.div>
+            <p className="text-gray-600 leading-relaxed">
+              Creating high-quality, modern templates for businesses and developers worldwide. 
+              With years of experience in web development and design, we focus on delivering 
+              professional, responsive, and user-friendly templates that help businesses grow online.
+            </p>
+          </div>
+        </div>
+      </div>
 
-          {/* Related Templates */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <h2 className="text-2xl md:text-3xl font-bold font-syne text-gray-900 mb-8 text-center">
-              Related <span className="text-primary">Templates</span>
-            </h2>
+      {/* Related Templates */}
+      {relatedTemplates.length > 0 && (
+        <div className="bg-white border-t">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Related <span className="text-blue-600">Templates</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Discover more templates from the same category that might interest you
+              </p>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {relatedTemplates.map((relatedTemplate, index) => (
-                <motion.div
-                  key={relatedTemplate.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                  transition={{ duration: 0.6, delay: 0.7 + index * 0.1 }}
-                >
+                <div key={relatedTemplate.id} className="group">
                   <TemplateCard template={relatedTemplate} index={index} />
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+            
+            <div className="text-center mt-10">
+              <Link
+                to="/templates"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300"
+              >
+                View All Templates
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
         </div>
-      </section>
+      )}
 
       <Footer />
-
-      {/* Full Screen Image Modal */}
-      {isFullScreenOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
-          onClick={() => setIsFullScreenOpen(false)}
-        >
-          {/* Close Button */}
-          <button
-            onClick={() => setIsFullScreenOpen(false)}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
-          >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Full Screen Image */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="max-w-7xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={template.image}
-              alt={template.title}
-              className="w-auto h-[720px] object-contain rounded-lg shadow-2xl"
-            />
-          </motion.div>
-                  </motion.div>
-        )}
         
         {/* Debug Info (Development Only) */}
-        {showDebug && (
-          <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded-lg text-xs z-50 max-w-sm">
+        {import.meta.env.DEV && (
+        <div className="fixed bottom-4 left-4 bg-black text-white p-4 rounded-lg text-xs z-50 max-w-md max-h-96 overflow-y-auto">
             <h4 className="font-bold mb-2">🐛 Debug Info</h4>
-            <pre className="text-xs whitespace-pre-wrap">
-              {JSON.stringify(debugInfo, null, 2)}
-            </pre>
+          <div className="space-y-2">
+            <div><strong>URL ID:</strong> {id}</div>
+            <div><strong>Loading:</strong> {loading ? 'Yes' : 'No'}</div>
+            <div><strong>Error:</strong> {error || 'None'}</div>
+            <div><strong>Template exists:</strong> {template ? 'Yes' : 'No'}</div>
+            {template && (
+              <>
+                <div><strong>Title:</strong> {template.title}</div>
+                <div><strong>Image:</strong> {template.image}</div>
+                <div><strong>Description:</strong> {template.description}</div>
+                <div><strong>Full Description:</strong> {template.fullDescription}</div>
+                <div><strong>Features:</strong> {JSON.stringify(template.features)}</div>
+                <div><strong>Technologies:</strong> {JSON.stringify(template.technologies)}</div>
+                <div><strong>Compatible With:</strong> {JSON.stringify(template.compatibleWith)}</div>
+                <div><strong>Demo URL:</strong> {template.demoUrl}</div>
+                <div><strong>Download URL:</strong> {template.downloadUrl}</div>
+              </>
+            )}
+          </div>
           </div>
         )}
       </div>

@@ -46,9 +46,13 @@ const TemplateCard = ({ template, index }) => {
       {/* Template Image */}
       <div className="relative overflow-hidden h-48 ">
         <img
-          src={template.image_url || template.image}
+          src={template.image_url || template.image || '/placeholder-image.svg'}
           alt={template.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          onError={(e) => {
+            // Fallback to placeholder if image fails to load
+            e.target.src = '/placeholder-image.svg';
+          }}
         />
       
         
@@ -72,12 +76,12 @@ const TemplateCard = ({ template, index }) => {
       <div className="p-4 md:p-5">
         {/* Title */}
         <h3 className="text-lg md:text-xl font-bold font-syne text-gray-900 mb-3 group-hover:text-primary transition-colors duration-300 line-clamp-2">
-          {template.title}
+          {template.title || 'Untitled Template'}
         </h3>
 
         {/* Technology Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {template.technologies && template.technologies.slice(0, 3).map((tech, index) => (
+          {template.technologies && Array.isArray(template.technologies) && template.technologies.slice(0, 3).map((tech, index) => (
             <span 
               key={index}
               className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded"
@@ -85,18 +89,23 @@ const TemplateCard = ({ template, index }) => {
               {tech}
             </span>
           ))}
-          {template.technologies && template.technologies.length > 3 && (
+          {template.technologies && Array.isArray(template.technologies) && template.technologies.length > 3 && (
             <span className="px-2 py-1 text-xs font-medium bg-gray-200 text-gray-500 rounded">
               +{template.technologies.length - 3}
+            </span>
+          )}
+          {(!template.technologies || !Array.isArray(template.technologies) || template.technologies.length === 0) && (
+            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-500 rounded">
+              No technologies listed
             </span>
           )}
         </div>
 
         {/* Rating */}
         <div className="flex items-center mb-4">
-          {renderStars(template.rating)}
+          {renderStars(template.rating || 5)}
           <span className="text-sm font-semibold text-gray-900 ml-2">
-            ({template.rating}.0)
+            ({template.rating || 5}.0)
           </span>
           <div className="flex items-center ml-auto text-sm text-gray-600">
             <svg
@@ -112,14 +121,14 @@ const TemplateCard = ({ template, index }) => {
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            {template.downloads}
+            {template.downloads || '0k'}
           </div>
         </div>
 
         {/* Price and Actions */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="text-xl md:text-2xl font-bold text-green-600">
-            {template.budget === 0 ? 'Free' : `$${template.budget}`}
+            {(template.budget === 0 || template.budget === '0') ? 'Free' : `$${template.budget || 0}`}
           </div>
           <div className="flex gap-2">
             <motion.button
@@ -144,7 +153,12 @@ const TemplateCard = ({ template, index }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 // Handle download logic here
-                window.open(template.downloadUrl || '#', '_blank');
+                if (template.downloadUrl && template.downloadUrl !== '#') {
+                  window.open(template.downloadUrl, '_blank');
+                } else {
+                  // Fallback to demo or contact
+                  alert('Download will be available after purchase. Contact us for more details.');
+                }
               }}
             >
               <svg className="w-4 h-4 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

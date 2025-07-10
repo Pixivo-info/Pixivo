@@ -161,9 +161,24 @@ export const getFeaturedTemplates = async (limit = 6) => {
  */
 export const createTemplate = async (templateData) => {
   try {
-    // Convert array fields if they're strings
+    // Convert array fields if they're strings and map frontend field names to database field names
     const processedData = {
-      ...templateData,
+      title: templateData.title,
+      description: templateData.description,
+      category: templateData.category,
+      budget: parseFloat(templateData.budget) || 0,
+      rating: parseInt(templateData.rating) || 5,
+      downloads: templateData.downloads || '0k',
+      status: templateData.status || 'published',
+      featured: templateData.featured || false,
+      version: templateData.version || '1.0.0',
+      // Map frontend field names to database field names
+      image_url: templateData.image || templateData.image_url,
+      full_description: templateData.fullDescription || templateData.full_description || templateData.description,
+      demo_url: templateData.demoUrl || templateData.demo_url,
+      download_url: templateData.downloadUrl || templateData.download_url,
+      file_size: templateData.fileSize || templateData.file_size,
+      // Handle array fields properly
       technologies: Array.isArray(templateData.technologies) 
         ? templateData.technologies 
         : templateData.technologies ? [templateData.technologies] : [],
@@ -172,21 +187,13 @@ export const createTemplate = async (templateData) => {
         : templateData.features ? [templateData.features] : [],
       compatible_with: Array.isArray(templateData.compatible_with) 
         ? templateData.compatible_with 
-        : templateData.compatible_with ? [templateData.compatible_with] : [],
-      // Map frontend field names to database field names
-      image_url: templateData.image,
-      full_description: templateData.fullDescription,
-      demo_url: templateData.demoUrl,
-      download_url: templateData.downloadUrl,
-      file_size: templateData.fileSize,
-    }
+        : Array.isArray(templateData.compatibleWith) 
+        ? templateData.compatibleWith
+        : templateData.compatible_with ? [templateData.compatible_with] 
+        : templateData.compatibleWith ? [templateData.compatibleWith] : []
+    };
 
-    // Remove fields that don't exist in database
-    delete processedData.image
-    delete processedData.fullDescription
-    delete processedData.demoUrl
-    delete processedData.downloadUrl
-    delete processedData.fileSize
+    console.log('🔄 Debug - Creating template with data:', processedData); // Debug log
 
     const { data, error } = await supabaseAdmin
       .from(TABLES.TEMPLATES)
@@ -195,9 +202,10 @@ export const createTemplate = async (templateData) => {
       .single()
 
     handleSupabaseError(error)
+    console.log('✅ Debug - Template created successfully:', data); // Debug log
     return data
   } catch (error) {
-    console.error('Error creating template:', error)
+    console.error('❌ Error creating template:', error)
     throw error
   }
 }
@@ -210,9 +218,24 @@ export const createTemplate = async (templateData) => {
  */
 export const updateTemplate = async (id, templateData) => {
   try {
-    // Convert array fields if they're strings
+    // Convert array fields if they're strings and map frontend field names to database field names
     const processedData = {
-      ...templateData,
+      title: templateData.title,
+      description: templateData.description,
+      category: templateData.category,
+      budget: parseFloat(templateData.budget) || 0,
+      rating: parseInt(templateData.rating) || 5,
+      downloads: templateData.downloads,
+      status: templateData.status,
+      featured: templateData.featured,
+      version: templateData.version,
+      // Map frontend field names to database field names
+      image_url: templateData.image || templateData.image_url,
+      full_description: templateData.fullDescription || templateData.full_description || templateData.description,
+      demo_url: templateData.demoUrl || templateData.demo_url,
+      download_url: templateData.downloadUrl || templateData.download_url,
+      file_size: templateData.fileSize || templateData.file_size,
+      // Handle array fields properly
       technologies: Array.isArray(templateData.technologies) 
         ? templateData.technologies 
         : templateData.technologies ? [templateData.technologies] : [],
@@ -221,23 +244,17 @@ export const updateTemplate = async (id, templateData) => {
         : templateData.features ? [templateData.features] : [],
       compatible_with: Array.isArray(templateData.compatible_with) 
         ? templateData.compatible_with 
-        : templateData.compatible_with ? [templateData.compatible_with] : [],
-      // Map frontend field names to database field names
-      image_url: templateData.image,
-      full_description: templateData.fullDescription,
-      demo_url: templateData.demoUrl,
-      download_url: templateData.downloadUrl,
-      file_size: templateData.fileSize,
-    }
+        : Array.isArray(templateData.compatibleWith) 
+        ? templateData.compatibleWith
+        : templateData.compatible_with ? [templateData.compatible_with] 
+        : templateData.compatibleWith ? [templateData.compatibleWith] : []
+    };
 
-    // Remove fields that don't exist in database or shouldn't be updated
+    // Remove fields that shouldn't be updated
     delete processedData.id
     delete processedData.created_at
-    delete processedData.image
-    delete processedData.fullDescription
-    delete processedData.demoUrl
-    delete processedData.downloadUrl
-    delete processedData.fileSize
+
+    console.log('🔄 Debug - Updating template with data:', processedData); // Debug log
 
     const { data, error } = await supabaseAdmin
       .from(TABLES.TEMPLATES)
@@ -247,9 +264,10 @@ export const updateTemplate = async (id, templateData) => {
       .single()
 
     handleSupabaseError(error)
+    console.log('✅ Debug - Template updated successfully:', data); // Debug log
     return data
   } catch (error) {
-    console.error('Error updating template:', error)
+    console.error('❌ Error updating template:', error)
     throw error
   }
 }
