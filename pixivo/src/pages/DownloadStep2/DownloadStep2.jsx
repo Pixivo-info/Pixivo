@@ -89,7 +89,7 @@ const DownloadStep2 = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-green-900 via-blue-900 to-purple-900">
+      <section className="py-20 pt-34 bg-gradient-to-br from-green-900 via-blue-900 to-purple-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -167,82 +167,74 @@ const DownloadStep2 = () => {
             </motion.div>
           )}
 
-          {/* Timer Section */}
+          {/* Timer Section - Simple Design */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-center mb-12"
           >
             {!canDownload ? (
-              <div className="bg-white rounded-xl p-12 shadow-lg border border-gray-100">
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="mb-6"
-                >
-                  <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full text-white text-4xl font-bold">
+              <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+                {/* Simple Timer */}
+                <div className="mb-6">
+                  <div className="inline-flex items-center justify-center w-24 h-24 bg-blue-600 rounded-full text-white text-2xl font-bold mb-4">
                     {formatTime(timeLeft)}
                   </div>
-                </motion.div>
+                </div>
                 
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Preparing Your Download</h2>
-                <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                  We're gathering all the files, checking for the latest updates, and ensuring everything is ready for you. 
-                  This process helps maintain the highest quality of our templates.
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Preparing Your Download
+                </h2>
+                <p className="text-gray-600 mb-6 max-w-xl mx-auto">
+                  Please wait while we prepare your template files. This ensures you get the latest version.
                 </p>
                 
-                {/* Progress Animation */}
+                {/* Simple Progress Bar */}
                 <div className="max-w-md mx-auto">
-                  <div className="bg-gray-200 rounded-full h-3 mb-4">
+                  <div className="flex justify-between text-sm text-gray-500 mb-2">
+                    <span>Progress</span>
+                    <span>{Math.round(((20 - timeLeft) / 20) * 100)}%</span>
+                  </div>
+                  <div className="bg-gray-200 rounded-full h-3">
                     <motion.div
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full"
+                      className="bg-blue-600 h-3 rounded-full"
                       initial={{ width: '0%' }}
                       animate={{ width: `${((20 - timeLeft) / 20) * 100}%` }}
                       transition={{ duration: 0.5 }}
                     ></motion.div>
                   </div>
-                  <p className="text-sm text-gray-500">
-                    {Math.round(((20 - timeLeft) / 20) * 100)}% Complete
-                  </p>
                 </div>
               </div>
             ) : (
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-xl p-12 shadow-lg border border-gray-100"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="mb-6"
-                >
-                  <div className="inline-flex items-center justify-center w-24 h-24 bg-green-500 rounded-full text-white mb-4">
-                    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+                <div className="mb-6">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-green-600 rounded-full text-white mb-4">
+                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                </motion.div>
+                </div>
                 
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Download!</h2>
-                <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                  Your template is ready! Click the button below to start downloading your premium template package.
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  Ready to Download!
+                </h2>
+                <p className="text-gray-600 mb-8 max-w-xl mx-auto">
+                  Your template is ready! Click the button below to start downloading.
                 </p>
                 
                 <motion.button
                   onClick={handleDownload}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="inline-flex items-center space-x-3 bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg transition-all duration-200"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Download Now</span>
                 </motion.button>
-              </motion.div>
+              </div>
             )}
           </motion.div>
 
