@@ -63,8 +63,8 @@ function App() {
           <Route path="custom-solutions" element={<CustomSolutionsManagement />} />
         </Route>
 
-        {/* Analytics */}
-      </Routes>
+          {/* Analytics */}
+        </Routes>
       <Analytics />
       <SpeedInsights />
     </AuthProvider>
